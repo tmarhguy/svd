@@ -1,0 +1,212 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="formulaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.6" />
+    </linearGradient>
+    
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0ea5e9" />
+      <stop offset="50%" style="stop-color:#8b5cf6" />
+      <stop offset="100%" style="stop-color:#10b981" />
+    </linearGradient>
+    
+    <!-- Filters -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Animation definitions -->
+    <style type="text/css">
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+      
+      @keyframes formulaGlow {
+        0%, 100% { filter: brightness(1); }
+        50% { filter: brightness(1.3); }
+      }
+      
+      .title {
+        font-family: 'Inter', sans-serif;
+        font-size: 24px;
+        font-weight: bold;
+        fill: url(#textGradient);
+        filter: url(#glow);
+        text-anchor: middle;
+      }
+      
+      .formula {
+        font-family: 'Times New Roman', serif;
+        font-size: 18px;
+        fill: #f59e0b;
+        font-weight: bold;
+        animation: formulaGlow 3s ease-in-out infinite;
+      }
+      
+      .formula-label {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        fill: #e2e8f0;
+        text-anchor: middle;
+      }
+      
+      .math-text {
+        font-family: 'Times New Roman', serif;
+        font-size: 16px;
+        fill: #10b981;
+        font-weight: bold;
+      }
+      
+      .annotation {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        fill: #94a3b8;
+        text-anchor: middle;
+      }
+      
+      .highlight-box {
+        fill: none;
+        stroke: #0ea5e9;
+        stroke-width: 2;
+        stroke-dasharray: 5,5;
+        animation: pulse 2s ease-in-out infinite;
+      }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="400" fill="#0f172a" opacity="0.1"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" class="title">Mathematical Formulas</text>
+  
+  <!-- SVD Decomposition Formula -->
+  <g transform="translate(50, 80)">
+    <rect x="0" y="0" width="300" height="80" class="highlight-box" rx="8"/>
+    <g transform="translate(150, 40)">
+      <text x="-50" y="0" class="formula" text-anchor="middle">A</text>
+      <text x="-25" y="0" class="formula" text-anchor="middle">=</text>
+      <text x="0" y="0" class="formula" text-anchor="middle">U</text>
+      <text x="25" y="0" class="formula" text-anchor="middle">Σ</text>
+      <text x="45" y="0" class="formula" text-anchor="middle">V</text>
+      <text x="55" y="-8" class="formula" text-anchor="middle" font-size="14">T</text>
+    </g>
+    <text x="150" y="70" class="formula-label">SVD Decomposition</text>
+  </g>
+  
+  <!-- Rank-k Approximation -->
+  <g transform="translate(400, 80)">
+    <rect x="0" y="0" width="300" height="80" class="highlight-box" rx="8"/>
+    <g transform="translate(150, 40)">
+      <text x="-70" y="0" class="formula" text-anchor="middle">A</text>
+      <text x="-55" y="8" class="formula" text-anchor="middle" font-size="14">k</text>
+      <text x="-35" y="0" class="formula" text-anchor="middle">=</text>
+      <text x="-10" y="0" class="formula" text-anchor="middle">U</text>
+      <text x="5" y="8" class="formula" text-anchor="middle" font-size="14">k</text>
+      <text x="25" y="0" class="formula" text-anchor="middle">Σ</text>
+      <text x="40" y="8" class="formula" text-anchor="middle" font-size="14">k</text>
+      <text x="55" y="0" class="formula" text-anchor="middle">V</text>
+      <text x="70" y="8" class="formula" text-anchor="middle" font-size="14">k</text>
+      <text x="80" y="-8" class="formula" text-anchor="middle" font-size="14">T</text>
+    </g>
+    <text x="150" y="70" class="formula-label">Rank-k Approximation</text>
+  </g>
+  
+  <!-- Storage Formula -->
+  <g transform="translate(50, 180)">
+    <rect x="0" y="0" width="300" height="80" class="highlight-box" rx="8"/>
+    <g transform="translate(150, 40)">
+      <text x="-80" y="0" class="formula" text-anchor="middle">Storage:</text>
+      <text x="-25" y="0" class="formula" text-anchor="middle">k</text>
+      <text x="-10" y="0" class="formula" text-anchor="middle">(</text>
+      <text x="5" y="0" class="formula" text-anchor="middle">m</text>
+      <text x="20" y="0" class="formula" text-anchor="middle">+</text>
+      <text x="35" y="0" class="formula" text-anchor="middle">n</text>
+      <text x="50" y="0" class="formula" text-anchor="middle">+</text>
+      <text x="65" y="0" class="formula" text-anchor="middle">1</text>
+      <text x="75" y="0" class="formula" text-anchor="middle">)</text>
+    </g>
+    <text x="150" y="70" class="formula-label">Compressed Storage</text>
+  </g>
+  
+  <!-- Error Formula -->
+  <g transform="translate(400, 180)">
+    <rect x="0" y="0" width="300" height="80" class="highlight-box" rx="8"/>
+    <g transform="translate(150, 40)">
+      <text x="-50" y="0" class="formula" text-anchor="middle">‖</text>
+      <text x="-30" y="0" class="formula" text-anchor="middle">A</text>
+      <text x="-10" y="0" class="formula" text-anchor="middle">−</text>
+      <text x="10" y="0" class="formula" text-anchor="middle">A</text>
+      <text x="25" y="8" class="formula" text-anchor="middle" font-size="14">k</text>
+      <text x="40" y="0" class="formula" text-anchor="middle">‖</text>
+      <text x="55" y="8" class="formula" text-anchor="middle" font-size="14">F</text>
+    </g>
+    <text x="150" y="70" class="formula-label">Frobenius Norm Error</text>
+  </g>
+  
+  <!-- Singular Values -->
+  <g transform="translate(50, 280)">
+    <rect x="0" y="0" width="300" height="80" class="highlight-box" rx="8"/>
+    <g transform="translate(150, 40)">
+      <text x="-80" y="0" class="formula" text-anchor="middle">σ</text>
+      <text x="-70" y="8" class="formula" text-anchor="middle" font-size="14">1</text>
+      <text x="-50" y="0" class="formula" text-anchor="middle">≥</text>
+      <text x="-25" y="0" class="formula" text-anchor="middle">σ</text>
+      <text x="-15" y="8" class="formula" text-anchor="middle" font-size="14">2</text>
+      <text x="5" y="0" class="formula" text-anchor="middle">≥</text>
+      <text x="25" y="0" class="formula" text-anchor="middle">...</text>
+      <text x="45" y="0" class="formula" text-anchor="middle">≥</text>
+      <text x="65" y="0" class="formula" text-anchor="middle">σ</text>
+      <text x="75" y="8" class="formula" text-anchor="middle" font-size="14">n</text>
+    </g>
+    <text x="150" y="70" class="formula-label">Singular Values Order</text>
+  </g>
+  
+  <!-- Compression Ratio -->
+  <g transform="translate(400, 280)">
+    <rect x="0" y="0" width="300" height="80" class="highlight-box" rx="8"/>
+    <g transform="translate(150, 40)">
+      <text x="-90" y="0" class="formula" text-anchor="middle">Ratio</text>
+      <text x="-60" y="0" class="formula" text-anchor="middle">=</text>
+      <g transform="translate(0, -8)">
+        <text x="-25" y="0" class="formula" text-anchor="middle" font-size="16">k</text>
+        <text x="-10" y="0" class="formula" text-anchor="middle" font-size="16">(</text>
+        <text x="5" y="0" class="formula" text-anchor="middle" font-size="16">m</text>
+        <text x="15" y="0" class="formula" text-anchor="middle" font-size="16">+</text>
+        <text x="25" y="0" class="formula" text-anchor="middle" font-size="16">n</text>
+        <text x="35" y="0" class="formula" text-anchor="middle" font-size="16">+</text>
+        <text x="45" y="0" class="formula" text-anchor="middle" font-size="16">1</text>
+        <text x="55" y="0" class="formula" text-anchor="middle" font-size="16">)</text>
+      </g>
+      <g transform="translate(0, 15)">
+        <text x="0" y="0" class="formula" text-anchor="middle" font-size="16">mn</text>
+      </g>
+    </g>
+    <text x="150" y="70" class="formula-label">Compression Ratio</text>
+  </g>
+  
+  <!-- Mathematical context -->
+  <g transform="translate(400, 380)">
+    <text x="0" y="0" class="annotation">
+    </text>
+  </g>
+  
+  <!-- Additional mathematical notation explanations -->
+  <g transform="translate(400, 380)">
+    <text x="0" y="0" class="annotation">
+      Where: A = original matrix, U,V = orthogonal matrices, Σ = diagonal matrix
+    </text>
+  </g>
+</svg>

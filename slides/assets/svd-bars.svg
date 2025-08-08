@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0369a1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="400" height="300" fill="#1e293b"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#e2e8f0" font-family="Inter, sans-serif" font-size="18" font-weight="bold">
+    Singular Value Spectrum
+  </text>
+  
+  <!-- Y-axis label -->
+  <text x="20" y="150" text-anchor="middle" fill="#e2e8f0" font-family="Inter, sans-serif" font-size="12" transform="rotate(-90, 20, 150)">
+    Singular Values (σ)
+  </text>
+  
+  <!-- X-axis label -->
+  <text x="200" y="280" text-anchor="middle" fill="#e2e8f0" font-family="Inter, sans-serif" font-size="12">
+    Index (i)
+  </text>
+  
+  <!-- Bars representing singular values -->
+  <g transform="translate(60, 50)">
+    <!-- Sample bars with decreasing heights -->
+    <rect x="0" y="0" width="8" height="180" fill="url(#barGradient)" opacity="0.9"/>
+    <rect x="12" y="20" width="8" height="160" fill="url(#barGradient)" opacity="0.8"/>
+    <rect x="24" y="40" width="8" height="140" fill="url(#barGradient)" opacity="0.7"/>
+    <rect x="36" y="60" width="8" height="120" fill="url(#barGradient)" opacity="0.6"/>
+    <rect x="48" y="80" width="8" height="100" fill="url(#barGradient)" opacity="0.5"/>
+    <rect x="60" y="100" width="8" height="80" fill="url(#barGradient)" opacity="0.4"/>
+    <rect x="72" y="120" width="8" height="60" fill="url(#barGradient)" opacity="0.3"/>
+    <rect x="84" y="140" width="8" height="40" fill="url(#barGradient)" opacity="0.2"/>
+    <rect x="96" y="160" width="8" height="20" fill="url(#barGradient)" opacity="0.1"/>
+    
+    <!-- More bars with smaller values -->
+    <rect x="108" y="170" width="8" height="10" fill="url(#barGradient)" opacity="0.1"/>
+    <rect x="120" y="175" width="8" height="5" fill="url(#barGradient)" opacity="0.1"/>
+    <rect x="132" y="178" width="8" height="2" fill="url(#barGradient)" opacity="0.1"/>
+  </g>
+  
+  <!-- Grid lines -->
+  <g stroke="#334155" stroke-width="1" opacity="0.3">
+    <line x1="60" y1="50" x2="60" y2="230"/>
+    <line x1="60" y1="230" x2="340" y2="230"/>
+    <line x1="60" y1="180" x2="340" y2="180"/>
+    <line x1="60" y1="130" x2="340" y2="130"/>
+    <line x1="60" y1="80" x2="340" y2="80"/>
+  </g>
+  
+  <!-- Decay curve overlay -->
+  <path d="M 60 50 Q 120 80 180 120 T 300 200" stroke="#f59e0b" stroke-width="2" fill="none" opacity="0.7"/>
+  
+  <!-- Annotation -->
+  <text x="200" y="250" text-anchor="middle" fill="#f59e0b" font-family="Inter, sans-serif" font-size="12" font-style="italic">
+    Rapid decay enables low-rank approximation
+  </text>
+</svg>
