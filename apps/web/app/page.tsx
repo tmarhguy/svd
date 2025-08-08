@@ -18,6 +18,8 @@ import WriteupSection from "../components/WriteupSection";
 import ReferencesSection from "../components/ReferencesSection";
 import AboutAuthor from "../components/AboutAuthor";
 import MatrixRepresentation from "../components/MatrixRepresentation";
+import ErrorBoundary from "../components/ErrorBoundary";
+import PerformanceMonitor from "../components/PerformanceMonitor";
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -244,7 +246,8 @@ export default function Home() {
   // no quality slider; color/grayscale toggle instead
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-space-900 via-space-800 to-space-900 text-white">
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-br from-space-900 via-space-800 to-space-900 text-white">
       {/* Accessibility and mobile optimizations would go here */}
 
       {/* Header */}
@@ -656,6 +659,18 @@ export default function Home() {
                   </div>
                 </div>
               )}
+
+              {/* Performance Monitor */}
+              <PerformanceMonitor 
+                isProcessing={loading}
+                metrics={compressionResult ? {
+                  processingTime: compressionResult.processingTime,
+                  memoryUsage: compressionResult.originalSize,
+                  cpuUsage: 0, // Not implemented yet
+                  compressionRatio: compressionResult.compressionRatio,
+                  qualityScore: compressionResult.quality
+                } : null}
+              />
 
               {/* Compression Results */}
               {compressionResult && (
@@ -1124,5 +1139,6 @@ export default function Home() {
         </div>
       </footer>
     </div>
+    </ErrorBoundary>
   );
 }

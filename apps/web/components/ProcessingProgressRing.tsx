@@ -1,163 +1,163 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
-type Props = {
-  /** 0–100 */
+interface ProcessingProgressRingProps {
   progress: number;
-  /** px */
-  size?: number;
-  /** px */
-  stroke?: number;
-  /** mark as complete */
-  done?: boolean;
-  /** small label under % */
+  done: boolean;
   label?: string;
-};
+}
 
-export default function ProcessingProgressRing({
-  progress,
-  size = 112,
-  stroke = 6,
-  done = false,
-  label = "Processing",
-}: Props) {
-  // clamp 0..100
-  const p = Math.max(0, Math.min(100, Number.isFinite(progress) ? progress : 0));
+export default function ProcessingProgressRing({ 
+  progress, 
+  done, 
+  label = "Processing" 
+}: ProcessingProgressRingProps) {
+  const [displayed, setDisplayed] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const elapsedMs = useRef(0);
+  const startTime = useRef<number | null>(null);
 
-  // geometry
-  const radius = (size - stroke) / 2;
+  // Calculate dimensions
+  const radius = 40;
   const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference * (1 - p / 100);
+  const dashOffset = useMemo(() => {
+    const percentage = Math.min(100, Math.max(0, displayed));
+    return circumference - (percentage / 100) * circumference;
+  }, [displayed, circumference]);
 
-  // simple elapsed timer (so you get a live counter)
-  const [elapsedMs, setElapsedMs] = useState(0);
-  const timerRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
+  const fontSize = useMemo(() => {
+    return Math.max(12, Math.min(16, 14 + (displayed / 100) * 4));
+  }, [displayed]);
 
+  // Animate displayed progress towards actual progress
   useEffect(() => {
-    // start counting when progress starts
-    if (p > 0 && !done && timerRef.current == null) {
-      startRef.current = performance.now();
-      timerRef.current = window.setInterval(() => {
-        if (startRef.current != null) {
-          setElapsedMs(performance.now() - startRef.current);
-        }
-      }, 60);
+    if (progress === 0) {
+      setDisplayed(0);
+      setVisible(false);
+      return;
     }
-    // stop when done or reset when progress is zeroed
-    if (done || p === 0) {
-      if (timerRef.current != null) {
-        window.clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      if (p === 0) {
-        startRef.current = null;
-        setElapsedMs(0);
-      }
+
+    if (!visible) {
+      setVisible(true);
+      startTime.current = Date.now();
     }
-    return () => {
-      if (timerRef.current != null) {
-        window.clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [p, done]);
 
-  const ms = Math.max(0, Math.round(elapsedMs));
-  const seconds = Math.floor(ms / 1000);
-  const millis = String(ms % 1000).padStart(3, "0");
+    const target = done ? 100 : progress;
+    const diff = target - displayed;
+    
+    if (Math.abs(diff) < 0.1) {
+      setDisplayed(target);
+      return;
+    }
 
-  // Always render when there is progress or we're done (lets you see the finish)
-  if (p === 0 && !done) return null;
+    const increment = diff * 0.1;
+    setDisplayed(prev => prev + increment);
+  }, [progress, done, visible]);
+
+  // Reset when done
+  useEffect(() => {
+    if (done && displayed >= 99.9) {
+      const timer = setTimeout(() => {
+        setVisible(false);
+        setDisplayed(0);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [done, displayed]);
+
+  if (!visible) return null;
 
   return (
-    <div
-      role="progressbar"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={p}
-      aria-label={label}
-      className="relative"
-      style={{ width: size, height: size }}
-    >
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {/* background ring */}
+    <div className="relative w-24 h-24">
+      <svg
+        className="w-24 h-24 transform -rotate-90"
+        viewBox="0 0 100 100"
+      >
+        {/* Background circle */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx="50"
+          cy="50"
           r={radius}
+          stroke="rgba(75, 85, 99, 0.3)"
+          strokeWidth="4"
           fill="none"
-          stroke="#374151"
-          strokeWidth={stroke}
         />
-
-        {/* progress ring */}
+        
+        {/* Progress circle */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx="50"
+          cy="50"
           r={radius}
+          stroke="url(#gradient)"
+          strokeWidth="4"
           fill="none"
-          stroke={done ? "#22c55e" : "#60a5fa"}
-          strokeWidth={stroke}
-          strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
-          // start from 12 o'clock
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          // smooth updates
-          style={{ transition: "stroke-dashoffset 180ms linear, stroke 180ms linear" }}
+          strokeLinecap="round"
+          className="transition-all duration-300 ease-out"
         />
-
-        {/* % text */}
-        <text
-          x="50%"
-          y="46%"
-          dominantBaseline="middle"
-          textAnchor="middle"
-          style={{
-            fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-            fontWeight: 700,
-            fontSize: size * 0.22,
-            fill: done ? "#22c55e" : "#e5e7eb",
-          }}
-        >
-          {done ? "100%" : `${p.toFixed(0)}%`}
-        </text>
-
-        {/* label */}
-        <text
-          x="50%"
-          y="63%"
-          dominantBaseline="middle"
-          textAnchor="middle"
-          style={{
-            fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-            fontSize: size * 0.10,
-            fill: "#9ca3af",
-            letterSpacing: "0.06em",
-          }}
-        >
-          {done ? "Done" : label}
-        </text>
-
-        {/* elapsed time */}
+        
+        {/* Gradient definition */}
+        <defs>
+          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#10b981" />
+            <stop offset="50%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#8b5cf6" />
+          </linearGradient>
+        </defs>
+        
+        {/* Animated dots when processing */}
         {!done && (
-          <text
-            x="50%"
-            y="77%"
-            dominantBaseline="middle"
-            textAnchor="middle"
-            style={{
-              fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
-              fontSize: size * 0.09,
-              fill: "#9ca3af",
-            }}
-          >
-            {seconds}.{millis}s
-          </text>
+          <>
+            <circle
+              cx="50"
+              cy="50"
+              r="2"
+              fill="#10b981"
+              className="animate-pulse"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="1"
+              fill="#3b82f6"
+              className="animate-ping"
+              style={{ animationDelay: '0.5s' }}
+            />
+          </>
+        )}
+        
+        {/* Success checkmark when done */}
+        {done && (
+          <path
+            d="M35 50 L45 60 L65 40"
+            stroke="#10b981"
+            strokeWidth="3"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="animate-draw"
+          />
         )}
       </svg>
+      
+      {/* Percentage text */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span 
+          className="font-bold text-gray-200 transition-all duration-300"
+          style={{ fontSize: `${fontSize}px` }}
+        >
+          {done ? "✓" : `${Math.round(displayed)}%`}
+        </span>
+      </div>
+      
+      {/* Label */}
+      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+        <span className="text-xs text-gray-400 font-medium">
+          {done ? "Complete" : label}
+        </span>
+      </div>
     </div>
   );
 }
