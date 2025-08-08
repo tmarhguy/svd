@@ -7,16 +7,27 @@ import { Cpu, Upload, Brain, Zap, Atom, Rocket, Target, Database, Network, Code,
 import { compressImage, getSingularValues, CompressionResult, CompressionOptions, estimateOptimalRank, calculateCompressionEfficiency, precomputeSVD, reconstructFromPrecomputed } from "../utils/svdCompression";
 
 import DropZone from "../components/DropZone";
+import SliderChart from "../components/SliderChart";
 import Quiz from "../components/Quiz";
+import SectionNavigator from "../components/SectionNavigator";
 import WelcomeSection from "../components/WelcomeSection";
+import ContentSection from "../components/ContentSection";
+import CalloutBox from "../components/CalloutBox";
+import MathRenderer from "../components/MathRenderer";
 import ErrorCurve from "../components/ErrorCurve";
+import CompressionMetrics from "../components/CompressionMetrics";
 import ProcessingProgressRing from "../components/ProcessingProgressRing";
+import ImageComparison from "../components/ImageComparison";
 import SVDVisualization from "../components/SVDVisualization";
-import SVDComputationGuide from "../components/SVDComputationGuide";
-import CompressionComparison from "../components/CompressionComparison";
+import SampleImages from "../components/SampleImages";
+import MathDiagrams from "../components/MathDiagrams";
+import InteractiveSVDDemo from "../components/InteractiveSVDDemo";
+import KeyboardShortcuts from "../components/KeyboardShortcuts";
+import MobileOptimizedDemo from "../components/MobileOptimizedDemo";
+import AccessibilityEnhancements from "../components/AccessibilityEnhancements";
+import EducationalSections from "../components/EducationalSections";
 import WriteupSection from "../components/WriteupSection";
 import ReferencesSection from "../components/ReferencesSection";
-import AboutAuthor from "../components/AboutAuthor";
 import MatrixRepresentation from "../components/MatrixRepresentation";
 
 export default function Home() {
@@ -778,164 +789,41 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold neon-text">Digital Pixels & Color Theory</h3>
+                  <h3 className="text-2xl font-bold neon-text">Digital Pixels</h3>
                 </div>
                 
-                <div className="space-y-6 text-gray-300">
-                  <div className="space-y-4">
-                    <p className="text-lg leading-relaxed">
-                      Every digital image is fundamentally a <span className="hologram-text font-semibold">matrix of numbers</span>. Each pixel contains RGB values (0-255) representing color intensity, creating a mathematical representation of visual information.
-                    </p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 bg-space-800/50 rounded-xl border border-space-600">
-                        <h4 className="font-semibold text-blue-400 mb-2">Color Channels</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 bg-red-500 rounded"></div>
-                            <span>Red Channel (0-255)</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 bg-green-500 rounded"></div>
-                            <span>Green Channel (0-255)</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                            <span>Blue Channel (0-255)</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="p-4 bg-space-800/50 rounded-xl border border-space-600">
-                        <h4 className="font-semibold text-purple-400 mb-2">Image Formats</h4>
-                        <div className="space-y-2 text-sm">
-                          <div>• <span className="text-green-400">Grayscale:</span> Single channel (0-255)</div>
-                          <div>• <span className="text-blue-400">RGB:</span> Three channels (24-bit)</div>
-                          <div>• <span className="text-purple-400">RGBA:</span> Four channels (32-bit)</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="space-y-4 text-gray-300">
+                  <p className="text-lg leading-relaxed">
+                    Every image is a <span className="hologram-text font-semibold">matrix of numbers</span>. Each pixel contains RGB values (0-255) representing color intensity.
+                  </p>
                   
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-yellow-400">Color Examples</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-space-800/50 rounded-xl">
-                      <div className="text-center">
-                        <div className="w-8 h-8 bg-black mx-auto mb-2 rounded border border-gray-600"></div>
-                        <p className="text-xs text-gray-400">Black: (0,0,0)</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-8 h-8 bg-white mx-auto mb-2 rounded border border-gray-600"></div>
-                        <p className="text-xs text-gray-400">White: (255,255,255)</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-8 h-8 bg-red-500 mx-auto mb-2 rounded border border-gray-600"></div>
-                        <p className="text-xs text-gray-400">Red: (255,0,0)</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-8 h-8 bg-blue-500 mx-auto mb-2 rounded border border-gray-600"></div>
-                        <p className="text-xs text-gray-400">Blue: (0,0,255)</p>
-                      </div>
+                  <div className="grid grid-cols-3 gap-4 p-4 bg-space-800/50 rounded-xl">
+                    <div className="text-center">
+                      <div className="w-8 h-8 bg-black mx-auto mb-2 rounded"></div>
+                      <p className="text-xs text-gray-400">Black: (0,0,0)</p>
                     </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-green-400">Mathematical Representation</h4>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-space-800/50 rounded-lg">
-                                                 <span className="text-neon-400 font-semibold">Grayscale Image:</span> Matrix A ∈ ℝ^(m×n)
-                      </div>
-                      <div className="p-3 bg-space-800/50 rounded-lg">
-                        <span className="text-plasma-400 font-semibold">Color Image:</span> Three matrices A_R, A_G, A_B ∈ ℝ^(m×n)
-                      </div>
-                      <div className="p-3 bg-space-800/50 rounded-lg">
-                        <span className="text-matrix-400 font-semibold">Pixel Value:</span> a_ij ∈ [0, 255] for grayscale
-                      </div>
+                    <div className="text-center">
+                      <div className="w-8 h-8 bg-white mx-auto mb-2 rounded"></div>
+                      <p className="text-xs text-gray-400">White: (255,255,255)</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-8 h-8 bg-red-500 mx-auto mb-2 rounded"></div>
+                      <p className="text-xs text-gray-400">Red: (255,0,0)</p>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-3 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold neon-text">Image Properties & Statistics</h3>
-                </div>
-                
-                <div className="space-y-6 text-gray-300">
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-orange-400">Resolution & Dimensions</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-3 bg-space-800/50 rounded-lg">
-                        <div className="text-sm text-gray-400">Common Resolutions</div>
-                        <div className="space-y-1 text-sm">
-                          <div>• HD: 1920×1080 (2.1M pixels)</div>
-                          <div>• 4K: 3840×2160 (8.3M pixels)</div>
-                          <div>• 8K: 7680×4320 (33.2M pixels)</div>
-                        </div>
-                      </div>
-                      <div className="p-3 bg-space-800/50 rounded-lg">
-                        <div className="text-sm text-gray-400">Storage Requirements</div>
-                        <div className="space-y-1 text-sm">
-                          <div>• RGB: 3 bytes/pixel</div>
-                          <div>• RGBA: 4 bytes/pixel</div>
-                          <div>• HD RGB: ~6.2 MB</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-cyan-400">Image Characteristics</h4>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-space-800/50 rounded-lg">
-                        <span className="text-neon-400 font-semibold">Spatial Correlation:</span> Adjacent pixels are often similar
-                      </div>
-                      <div className="p-3 bg-space-800/50 rounded-lg">
-                        <span className="text-plasma-400 font-semibold">Frequency Content:</span> Most images have low-frequency dominance
-                      </div>
-                      <div className="p-3 bg-space-800/50 rounded-lg">
-                        <span className="text-matrix-400 font-semibold">Redundancy:</span> Natural images contain significant redundancy
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-pink-400">Why Compression Works</h4>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                        <span>Images have <span className="text-green-400 font-semibold">spatial redundancy</span> - similar colors in nearby pixels</span>
-                      </div>
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                        <span><span className="text-blue-400 font-semibold">Frequency redundancy</span> - most energy in low frequencies</span>
-                      </div>
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                        <span><span className="text-purple-400 font-semibold">Perceptual redundancy</span> - humans don't notice small changes</span>
-                      </div>
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
-                        <span><span className="text-yellow-400 font-semibold">Statistical redundancy</span> - predictable patterns in natural images</span>
-                      </div>
-                    </div>
+
+              <div className="relative">
+                <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl">
+                  <div className="relative w-full h-64">
+                    <Image src="/slides/assets/svg/matrix-heatmap.svg" alt="Matrix Heatmap" fill className="object-contain" />
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
-
-        {/* Write-up (comprehensive academic content) */}
-        <WriteupSection />
-
-        {/* Compression Comparison Section */}
-        <CompressionComparison />
 
         {/* SVD Math Section */}
         <section className="mb-12">
@@ -1092,8 +980,131 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SVD Computation Guide */}
-        <SVDComputationGuide />
+        {/* Deep Dives & Educational Content */}
+        <EducationalSections />
+
+        {/* Write-up (comprehensive academic content) */}
+        <WriteupSection />
+
+- **Grayscale:** $A_{ij}\\in[0,1]$ (or $[0,255]$) encodes intensity at row $i$, column $j$.
+- **RGB:** three matrices $A^{(R)},A^{(G)},A^{(B)}$, each compressed independently:
+
+$$A^{(C)} \\approx A^{(C)}_k \\quad (C\\in\\{R,G,B\\}),$$
+
+then recombine channels. *(Optional refinement: transform to YCbCr to concentrate energy in luminance, but we keep it RGB for pedagogy.)*
+
+---
+
+## 6. Algorithmic & Computational Notes
+
+**Classical SVD** (Golub–Kahan bidiagonalization) is $O(mn\\min\\{m,n\\})$ and exact. For interactive demos we want faster **rank-$k$** approximations:
+
+- **Randomized SVD** (Halko–Martinsson–Tropp, 2011): Builds a near-optimal subspace for the top $k$ singular vectors using random projections and (optionally) 1–2 power iterations. Cost roughly
+
+$$O\\!\\big(mn\\log k + (m+n)k^2\\big)$$
+
+and often **much** faster for small $k$.
+
+- **Per-channel parallelism:** compute the SVD of $R,G,B$ in parallel (Web Workers / threads).
+
+- **Reconstruction is cheap:** once $U,\\Sigma,V^\\top$ are cached, changing $k$ only updates
+
+$$A_k = (U_{[:,1:k]} \\cdot \\Sigma_{1:k,1:k})\\, (V^\\top)_{1:k,:},$$
+
+which is $O(k(m+n))$.
+
+**Numerical tips.** Normalize to $[0,1]$ or $[-1,1]$, use \`float32\` for speed, clip results back to the valid image range, and prefer orthonormal bases for stability (don't absorb $\\sigma$ unless storage dictates).
+
+---
+
+## 7. Our Interactive Pipeline (What the Site Does)
+
+**User flow**
+
+1. **Upload** an image (PNG/JPEG).
+2. **Decode & normalize** to $[0,1]$. Optionally downscale a preview to $\\texttt{computeDim}$ (e.g., $512$ px longest edge) so interaction stays snappy.
+3. **Compute SVD**
+   - **Grayscale:** 1 matrix $A$.
+   - **RGB:** 3 matrices $A^{(R)},A^{(G)},A^{(B)}$ in parallel.
+   - For instant feedback we use a **randomized rank-$k_\\text{preview}$** (e.g., $k_\\text{preview}=\\min(k,64)$); if you pause the slider, we refine.
+4. **Reconstruct $A_k$** on slider move from cached $U,\\Sigma,V^\\top$.
+5. **Display** original vs. rank-$k$ image + **bar chart of $\\sigma_i$**.
+6. **Optionally export** the compressed image (server route with exact SVD).
+
+**Metrics we show**
+
+- **RMSE/Frobenius** error per channel (normalized).
+- **PSNR** for perceptual quality.
+- **Storage estimate** $k(m+n+1)$ vs. $mn$.
+- **Runtime** (precompute vs. reconstruct).
+
+**Performance heuristics**
+
+- Runtime depends mostly on **post-downscale size** and **$k$**, not the original file size.
+- Enabling workers (one per channel) reduces precompute time on multi-core CPUs.
+- We clamp giant inputs by \`MAX_LOAD_DIM\` and \`FILE_SIZE_LIMIT\` for stability.
+
+---
+
+## 8. Worked Micro-Example (Numerical)
+
+Consider a tiny $4\\times 4$ grayscale patch $A$:
+
+$$A=\\begin{pmatrix} 100 & 102 & 103 & 104\\\\ 98 & 99 & 101 & 102\\\\ 98 & 98 & 99 & 101\\\\ 97 & 97 & 98 & 99 \\end{pmatrix}.$$
+
+Compute SVD $A=U\\Sigma V^\\top$. Suppose the top singular values are $\\sigma_1=402.1$, $\\sigma_2=3.6$, $\\sigma_3=1.8$, $\\sigma_4=0.9$.
+
+- **Rank-1** approx $A_1=\\sigma_1 u_1 v_1^\\top$ already looks like a smooth gradient (dominant structure).
+- **Error** $\\|A-A_1\\|_F^2=\\sigma_2^2+\\sigma_3^2+\\sigma_4^2\\approx 3.6^2+1.8^2+0.9^2$.
+- **Rank-2** significantly reduces residual texture.
+
+This toy shows how **most energy is in $\\sigma_1$**; images often behave similarly.
+
+---
+
+## 9. Limitations & When SVD Shines
+
+- SVD is **global**: it captures large-scale structure well but may **blur sharp edges** at very low $k$.
+- JPEG's block DCT can preserve edges better at low bitrates but introduces **blocking artifacts**; SVD trades that for **smoothness**.
+- SVD is **lossy**; choose $k$ to match your fidelity budget.
+
+SVD shines for **teaching** (clear math), **denoising** (drop small $\\sigma_i$), **previewing** and **dimension reduction**.
+
+---
+
+## 10. "Course Connections" (Why This Is Linear Algebra)
+
+- **Orthogonal projections**: truncating to the top-$k$ singular vectors is an orthogonal projection that preserves the most energy.
+- **Least squares & PCA**: SVD underlies PCA; low-rank approximations minimize squared reconstruction error, just like least squares.
+- **Spectral theorem intuition**: for symmetric matrices (e.g., covariance), SVD reduces to an orthogonal eigen-decomposition.
+- **Norms**: Frobenius norm (sum of squared entries) vs. spectral norm (largest singular value) quantify different error notions.
+
+---
+
+## 11. Hardware Context (8-bit CPU)
+
+- **Memory math** (grayscale): store $mn$ bytes raw vs. $\\sim k(m+n+1)$ floats (or fixed-point) for a low-rank model.
+- **Example** $256\\times 256$: raw $=65{,}536$ bytes. With $k=20$, $k(m+n+1)=20(256+256+1)=10{,}260$ numbers—**\\~84% reduction** if you store in the same precision.
+- Low-rank models can be pre-loaded or streamed, then **reconstructed on device** with simple matrix multiplies (friendly to tiny CPUs).
+
+---
+
+## 12. Practical Tips & FAQ
+
+- **How to pick $k$?** Look at the $\\sigma_i$ bar chart; pick $k$ where the tail flattens.
+- **Color vs. grayscale?** Start grayscale for clarity; for color, use the same $k$ on each channel for consistency.
+- **Why does my image look blurry at small $k$?** Low-rank models keep large-scale structure first; textures/edges need more components.
+
+---
+
+## 13. References
+
+- **C. Eckart & G. Young (1936)**, *The approximation of one matrix by another of lower rank*, Psychometrika.
+- **G. H. Golub & C. F. Van Loan**, *Matrix Computations*, 4th ed., Johns Hopkins, 2013.
+- **L. N. Trefethen & D. Bau**, *Numerical Linear Algebra*, SIAM, 1997.
+- **N. Halko, P. G. Martinsson, J. A. Tropp (2011)**, *Finding structure with randomness: Probabilistic algorithms for constructing approximate matrix decompositions*, SIAM Review.
+- **D. Austin (AMS Feature Column)**, *We recommend a singular value decomposition*.`}
+        />
 
         {/* References */}
         <ReferencesSection />
@@ -1105,9 +1116,6 @@ export default function Home() {
             <Quiz />
           </div>
         </section>
-
-        {/* About the Author */}
-        <AboutAuthor />
       </main>
 
       {/* Footer */}

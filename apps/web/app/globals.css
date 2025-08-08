@@ -1,50 +1,637 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.imgDark {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
+/* Sci-Fi Global Styles */
+@layer base {
   html {
-    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+    color: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
   }
 
-  .imgLight {
-    display: none;
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
   }
-  .imgDark {
-    display: unset;
+
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 4px;
   }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #0ea5e9, #d946ef);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #0284c7, #c026d3);
+  }
+}
+
+@layer components {
+  /* Cyber Grid Background */
+  .cyber-grid-bg {
+    background-image: 
+      linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    position: relative;
+  }
+
+  .cyber-grid-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Holographic Card */
+  .hologram-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 
+      0 0 20px rgba(0, 255, 255, 0.2),
+      inset 0 0 20px rgba(0, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hologram-card::before {
+    content: none;
+  }
+
+  /* Plasma Button */
+  .plasma-button {
+    background: linear-gradient(135deg, #d946ef, #0ea5e9);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .plasma-button::before {
+    content: none;
+  }
+
+  .plasma-button:hover::before {
+    left: 100%;
+  }
+
+  .plasma-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(217, 70, 239, 0.4);
+  }
+
+  /* Quantum Slider */
+  .quantum-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: linear-gradient(90deg, #0ea5e9, #d946ef);
+    border-radius: 4px;
+    outline: none;
+    position: relative;
+  }
+
+  .quantum-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffffff, #0ea5e9);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(14, 165, 233, 0.6);
+    transition: all 0.3s ease;
+  }
+
+  .quantum-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 25px rgba(14, 165, 233, 0.8);
+  }
+
+  .quantum-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffffff, #0ea5e9);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 15px rgba(14, 165, 233, 0.6);
+  }
+
+  /* Quality Slider (Green) */
+  .quality-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 4px;
+    outline: none;
+    position: relative;
+  }
+
+  .quality-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffffff, #22c55e);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(80, 34, 197, 0.6);
+    transition: all 0.3s ease;
+  }
+
+  .quality-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+  }
+
+  .quality-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffffff, #22c55e);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+  }
+
+  /* Quality Slider with Green Thumb */
+  .quality-slider-green {
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+
+  .quality-slider-green::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #22c55e;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+    transition: all 0.3s ease;
+  }
+
+  .quality-slider-green::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+  }
+
+  .quality-slider-green::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #22c55e;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+  }
+
+  /* Regular Slider Styling */
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #22c55e;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(40, 34, 197, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  .slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.7);
+  }
+
+  .slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #22c55e;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+  }
+
+  /* Rank Slider (Blue) */
+  .rank-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+
+  .rank-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+    transition: all 0.3s ease;
+  }
+
+  .rank-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
+  }
+
+  .rank-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+  }
+
+  /* Quality Slider (Green) */
+  .quality-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+
+  .quality-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #22c55e;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  .quality-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.7);
+  }
+
+  .quality-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #22c55e;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+  }
+
+  /* Matrix Rain Effect */
+  .matrix-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.1;
+  }
+
+  .matrix-rain::before {
+    content: '01';
+    position: absolute;
+    color: #22c55e;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    animation: matrix-rain 20s linear infinite;
+  }
+
+  /* Cyber Dropzone */
+  .cyber-dropzone {
+    border: 2px dashed rgba(0, 255, 255, 0.5);
+    background: rgba(0, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cyber-dropzone::before {
+    content: none;
+  }
+
+  .cyber-dropzone:hover::before {
+    left: 100%;
+  }
+
+  .cyber-dropzone:hover {
+    border-color: rgba(0, 255, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  }
+
+  .cyber-dropzone-active {
+    border-color: #0ea5e9;
+    background: rgba(14, 165, 233, 0.1);
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.4);
+  }
+
+  /* Neon Text */
+  .neon-text {
+    color: #0ea5e9;
+    text-shadow: 0 0 5px #0ea5e9, 0 0 10px #0ea5e9, 0 0 15px #0ea5e9;
+    animation: neon-flicker 0.3s ease-in-out infinite alternate;
+  }
+
+  /* Holographic Text */
+  .hologram-text {
+    background: linear-gradient(135deg, #0ea5e9, #d946ef);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: hologram-flicker 0.5s ease-in-out infinite alternate;
+  }
+
+  /* Quantum Border */
+  .quantum-border {
+    border: 1px solid rgba(0, 255, 255, 0.6);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+    position: relative;
+  }
+
+  .quantum-border::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(45deg, #0ea5e9, #d946ef, #22c55e, #0ea5e9);
+    border-radius: inherit;
+    z-index: -1;
+    animation: quantum-pulse 4s ease-in-out infinite;
+  }
+
+  /* Space Background */
+  .space-bg {
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 25%, #16213e 50%, #1a1a2e 75%, #0a0a0f 100%);
+    position: relative;
+  }
+
+  .space-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
+      radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
+      radial-gradient(1px 1px at 90px 40px, #ffffff, transparent),
+      radial-gradient(1px 1px at 130px 80px, #ffffff, transparent),
+      radial-gradient(2px 2px at 160px 30px, #ffffff, transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: space-drift 12s ease-in-out infinite;
+    opacity: 0.3;
+  }
+
+  /* Plasma Wave */
+  .plasma-wave {
+    background: linear-gradient(135deg, #d946ef, #0ea5e9);
+    background-size: 200% 200%;
+    animation: plasma-wave 3s ease-in-out infinite;
+  }
+
+  /* Matrix Flow */
+  .matrix-flow {
+    background: linear-gradient(135deg, #22c55e, #0ea5e9);
+    background-size: 200% 200%;
+    animation: matrix-flow 15s linear infinite;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-hologram-scan {
+    animation: hologram-scan 3s linear infinite;
+  }
+
+  .animate-quantum-pulse {
+    animation: quantum-pulse 4s ease-in-out infinite;
+  }
+
+  .animate-plasma-wave {
+    animation: plasma-wave 3s ease-in-out infinite;
+  }
+
+  .animate-matrix-flow {
+    animation: matrix-flow 15s linear infinite;
+  }
+
+  .animate-space-drift {
+    animation: space-drift 12s ease-in-out infinite;
+  }
+
+  .animate-neon-flicker {
+    animation: neon-flicker 0.3s ease-in-out infinite alternate;
+  }
+
+  .animate-hologram-flicker {
+    animation: hologram-flicker 0.5s ease-in-out infinite alternate;
+  }
+}
+
+/* Custom keyframes for sci-fi animations */
+@keyframes hologram-scan {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
+}
+
+@keyframes quantum-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes plasma-wave {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes matrix-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes space-drift {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(5px) translateY(-5px);
+  }
+  75% {
+    transform: translateX(-5px) translateY(5px);
+  }
+}
+
+@keyframes neon-flicker {
+  0% {
+    opacity: 1;
+    text-shadow: 0 0 5px currentColor;
+  }
+  100% {
+    opacity: 0.8;
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+}
+
+@keyframes hologram-flicker {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  100% {
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .cyber-grid-bg {
+    background-size: 30px 30px;
+  }
+  
+  .hologram-card {
+    backdrop-filter: blur(5px);
+  }
+}
+
+/* Accessibility Enhancements */
+.high-contrast {
+  --neon-400: #00ffff;
+  --neon-500: #00ffff;
+  --plasma-400: #ff00ff;
+  --plasma-500: #ff00ff;
+  --matrix-400: #00ff00;
+  --matrix-500: #00ff00;
+  --quantum-400: #ffff00;
+  --quantum-500: #ffff00;
+  
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .hologram-card {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+.reduced-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.reduced-motion .animate-float,
+.reduced-motion .animate-hologram-scan,
+.reduced-motion .animate-quantum-pulse,
+.reduced-motion .animate-plasma-wave,
+.reduced-motion .animate-matrix-flow,
+.reduced-motion .animate-space-drift,
+.reduced-motion .animate-neon-flicker,
+.reduced-motion .animate-hologram-flicker {
+  animation: none !important;
+}
+
+/* Focus indicators for keyboard navigation */
+*:focus {
+  outline: 2px solid #00ffff !important;
+  outline-offset: 2px !important;
+}
+
+.high-contrast *:focus {
+  outline: 3px solid #ffffff !important;
+  outline-offset: 3px !important;
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip to content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000000;
+  color: #ffffff;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 6px;
 }

@@ -1,0 +1,165 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients for color channels -->
+    <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#dc2626;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#0284c7;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0ea5e9" />
+      <stop offset="50%" style="stop-color:#8b5cf6" />
+      <stop offset="100%" style="stop-color:#10b981" />
+    </linearGradient>
+    
+    <!-- Filters -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Animation definitions -->
+    <style type="text/css">
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+      
+      @keyframes colorFlow {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0); }
+      }
+      
+      .title {
+        font-family: 'Inter', sans-serif;
+        font-size: 24px;
+        font-weight: bold;
+        fill: url(#textGradient);
+        filter: url(#glow);
+        text-anchor: middle;
+      }
+      
+      .channel-box {
+        fill: none;
+        stroke: #0ea5e9;
+        stroke-width: 2;
+        stroke-dasharray: 5,5;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      
+      .red-channel {
+        fill: url(#redGradient);
+        animation: colorFlow 3s ease-in-out infinite;
+      }
+      
+      .green-channel {
+        fill: url(#greenGradient);
+        animation: colorFlow 3s ease-in-out infinite 0.5s;
+      }
+      
+      .blue-channel {
+        fill: url(#blueGradient);
+        animation: colorFlow 3s ease-in-out infinite 1s;
+      }
+      
+      .channel-label {
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        fill: #e2e8f0;
+        text-anchor: middle;
+      }
+      
+      .annotation {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        fill: #94a3b8;
+        text-anchor: middle;
+      }
+      
+      .arrow {
+        stroke: #10b981;
+        stroke-width: 3;
+        marker-end: url(#arrowhead);
+        animation: pulse 2s ease-in-out infinite;
+      }
+    </style>
+    
+    <!-- Arrow marker -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+            refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10b981" />
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="400" fill="#0f172a" opacity="0.1"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" class="title">RGB Color Channel Processing</text>
+  
+  <!-- Red Channel -->
+  <g transform="translate(50, 80)">
+    <rect x="0" y="0" width="200" height="80" class="channel-box" rx="8"/>
+    <rect x="10" y="10" width="180" height="60" class="red-channel" rx="4"/>
+    <text x="100" y="50" class="channel-label">Red Channel</text>
+    <text x="100" y="110" class="annotation">SVD processed separately</text>
+  </g>
+  
+  <!-- Green Channel -->
+  <g transform="translate(300, 80)">
+    <rect x="0" y="0" width="200" height="80" class="channel-box" rx="8"/>
+    <rect x="10" y="10" width="180" height="60" class="green-channel" rx="4"/>
+    <text x="100" y="50" class="channel-label">Green Channel</text>
+    <text x="100" y="110" class="annotation">Independent compression</text>
+  </g>
+  
+  <!-- Blue Channel -->
+  <g transform="translate(550, 80)">
+    <rect x="0" y="0" width="200" height="80" class="channel-box" rx="8"/>
+    <rect x="10" y="10" width="180" height="60" class="blue-channel" rx="4"/>
+    <text x="100" y="50" class="channel-label">Blue Channel</text>
+    <text x="100" y="110" class="annotation">Optimized storage</text>
+  </g>
+  
+  <!-- Arrows to combined result -->
+  <line x1="150" y1="200" x2="200" y2="200" class="arrow"/>
+  <line x1="400" y1="200" x2="450" y2="200" class="arrow"/>
+  <line x1="650" y1="200" x2="700" y2="200" class="arrow"/>
+  
+  <!-- Combined Result -->
+  <g transform="translate(300, 220)">
+    <rect x="0" y="0" width="200" height="80" class="channel-box" rx="8"/>
+    <rect x="10" y="10" width="60" height="60" class="red-channel" rx="4"/>
+    <rect x="80" y="10" width="60" height="60" class="green-channel" rx="4"/>
+    <rect x="150" y="10" width="40" height="60" class="blue-channel" rx="4"/>
+    <text x="100" y="50" class="channel-label">Combined RGB</text>
+    <text x="100" y="110" class="annotation">Reconstructed color image</text>
+  </g>
+  
+  <!-- Processing steps -->
+  <g transform="translate(400, 350)">
+    <text x="0" y="0" class="annotation">
+      Each RGB channel undergoes separate SVD compression and reconstruction
+    </text>
+  </g>
+</svg>
