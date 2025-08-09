@@ -2,15 +2,17 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Brain, Calculator, Database, Zap, Target, BookOpen, Code, BarChart3, Lightbulb, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
+import { Brain, Calculator, Database, Zap, Target, BookOpen, Code, BarChart3, Lightbulb, CheckCircle, AlertCircle, Grid3X3, Palette, Binary, Layers, Ruler, Image as ImageIcon } from "lucide-react";
 
 export default function WriteupSection() {
   const [activeTab, setActiveTab] = useState("overview");
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Brain },
+    { id: "image", label: "What is an Image?", icon: ImageIcon },
     { id: "mathematics", label: "Mathematics", icon: Calculator },
     { id: "implementation", label: "Implementation", icon: Code },
+    { id: "deepdive", label: "Deep Dive", icon: BookOpen },
     { id: "results", label: "Results", icon: BarChart3 },
     { id: "applications", label: "Applications", icon: Target }
   ];
@@ -50,6 +52,100 @@ export default function WriteupSection() {
 
         {/* Content Sections */}
         <div className="min-h-[600px]">
+          {activeTab === "image" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
+                      <Grid3X3 className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-blue-400">Pixels as a Matrix</h3>
+                  </div>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    Grayscale images can be represented as a matrix A ∈ ℝ^(m×n). Each entry Aᵢⱼ is a brightness value (often 0–255 for 8-bit).
+                  </p>
+                  <div className="mt-3 bg-gray-800 p-3 rounded">
+                    <span className="font-mono text-green-300 text-sm">A = [aᵢⱼ] ∈ ℝ^(m×n)</span>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-3 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl">
+                      <Palette className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-green-400">RGB: Three Matrices</h3>
+                  </div>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    Color images store Red, Green, and Blue channels separately. The displayed color is a combination of these values per pixel.
+                  </p>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                    <div className="text-center p-2 bg-red-500/20 rounded border border-red-500/30">Red</div>
+                    <div className="text-center p-2 bg-green-500/20 rounded border border-green-500/30">Green</div>
+                    <div className="text-center p-2 bg-blue-500/20 rounded border border-blue-500/30">Blue</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl">
+                      <Binary className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-yellow-400">Bit Depth</h3>
+                  </div>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    8-bit per channel uses integers in [0, 255]. Higher bit depths allow finer gradations. We normalize to [0, 1] for stability.
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
+                      <Layers className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-purple-400">In Memory</h3>
+                  </div>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    Pixel buffers are typically row-major (e.g., Uint8ClampedArray). RGB may be interleaved (RGBRGB...) or planar (RR.. GG.. BB..).
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="p-3 bg-gradient-to-r from-blue-500 to-green-500 rounded-xl">
+                    <Ruler className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-blue-400">Resolution & Aspect Ratio</h3>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  Resolution is width × height in pixels. Aspect ratio is width/height. We preserve aspect ratio in the side-by-side comparison.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="p-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl">
+                    <ImageIcon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-cyan-400">Why SVD Works for Images</h3>
+                </div>
+                <ul className="text-sm text-gray-300 list-disc list-inside space-y-2">
+                  <li>Natural images have local correlation; energy concentrates in a few singular values.</li>
+                  <li>Rank-k approximations capture dominant structures with far fewer numbers.</li>
+                  <li>Channel-wise SVD is simple and effective for compression.</li>
+                </ul>
+              </div>
+            </motion.div>
+          )}
           {activeTab === "overview" && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -173,6 +269,13 @@ export default function WriteupSection() {
                     <p className="text-sm text-gray-400 mt-3">
                       Keep only the top k singular values and vectors
                     </p>
+                    <details className="mt-3 text-sm text-gray-400">
+                      <summary className="cursor-pointer text-gray-200">Energy captured by top-k</summary>
+                      <div className="mt-2 bg-gray-800 p-3 rounded">
+                        <p className="font-mono text-green-300">E(k) = (∑ᵢ₌₁ᵏ σᵢ²) / (∑ᵢ₌₁ʳ σᵢ²)</p>
+                        <p className="mt-2">Choose k so that E(k) ≥ 0.9–0.99 depending on desired fidelity.</p>
+                      </div>
+                    </details>
                   </div>
                 </div>
 
@@ -197,6 +300,10 @@ export default function WriteupSection() {
                     <div className="bg-gray-800 p-4 rounded-lg text-center mt-3">
                       <span className="font-mono text-red-300 text-sm">‖A - Aₖ‖_F² = Σᵢ₌ₖ₊₁ σᵢ²</span>
                     </div>
+                    <details className="mt-3 text-sm text-gray-400">
+                      <summary className="cursor-pointer text-gray-200">SVD vs. PCA</summary>
+                      <p className="mt-2">For mean-centered data matrix X, PCA is obtained from SVD(X) with principal components in V and variances σᵢ²/(n−1). For images, applying SVD channel-wise is equivalent to PCA on pixel columns/rows.</p>
+                    </details>
                   </div>
                 </div>
               </div>
@@ -223,6 +330,14 @@ export default function WriteupSection() {
                     <p className="text-sm text-gray-400">Compression ratio</p>
                   </div>
                 </div>
+                <details className="mt-4 text-sm text-gray-400">
+                  <summary className="cursor-pointer text-gray-200">Computational notes</summary>
+                  <ul className="mt-2 list-disc list-inside space-y-1">
+                    <li>Full SVD costs O(m n min(m,n)). For images we often use truncated or randomized SVD.</li>
+                    <li>Color images: apply SVD per-channel or in a decorrelated space (e.g., YCbCr/YCgCo) and compress chroma more.</li>
+                    <li>Quantization can further reduce storage after truncation.</li>
+                  </ul>
+                </details>
               </div>
             </motion.div>
           )}
@@ -280,19 +395,91 @@ export default function WriteupSection() {
                     <div className="bg-gradient-to-br from-space-800 to-space-700 p-4 rounded-lg border border-space-600">
                       <h4 className="font-semibold text-blue-400 mb-2">Web Workers</h4>
                       <p className="text-sm text-gray-400">Parallel SVD computation for RGB channels</p>
+                      <details className="mt-2 text-sm text-gray-400">
+                        <summary className="cursor-pointer text-gray-200">Why it matters</summary>
+                        <p className="mt-1">Heavy linear algebra runs off the main thread to keep the UI responsive. Rank changes reuse precomputed factors, so updates are instant.</p>
+                      </details>
                     </div>
                     
                     <div className="bg-gradient-to-br from-space-800 to-space-700 p-4 rounded-lg border border-space-600">
                       <h4 className="font-semibold text-green-400 mb-2">Caching Strategy</h4>
                       <p className="text-sm text-gray-400">Store U, Σ, Vᵀ for instant rank changes</p>
+                      <details className="mt-2 text-sm text-gray-400">
+                        <summary className="cursor-pointer text-gray-200">Reconstruction</summary>
+                        <p className="mt-1">We compute Aₖ = Uₖ Σₖ Vₖᵀ quickly by slicing cached factors; no need to recompute SVD for each slider move.</p>
+                      </details>
                     </div>
                     
                     <div className="bg-gradient-to-br from-space-800 to-space-700 p-4 rounded-lg border border-space-600">
                       <h4 className="font-semibold text-purple-400 mb-2">Adaptive Processing</h4>
                       <p className="text-sm text-gray-400">Auto-downscaling for large images</p>
+                      <details className="mt-2 text-sm text-gray-400">
+                        <summary className="cursor-pointer text-gray-200">Color handling</summary>
+                        <p className="mt-1">Grayscale and color mixing happen consistently across original/uploaded images to avoid hue shifts.</p>
+                      </details>
                     </div>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "deepdive" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-8"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-blue-400">Geometric Intuition</h3>
+                  <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      SVD rotates the input basis to directions of maximal variance (columns of V), scales by singular values (Σ),
+                      then rotates to the output basis (columns of U). Truncating small σᵢ removes fine detail/noise first.
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                    <h4 className="text-lg font-semibold text-green-400 mb-2">Choosing k</h4>
+                    <ul className="text-sm text-gray-400 list-disc list-inside space-y-1">
+                      <li>Energy rule: pick smallest k with E(k) ≥ threshold (e.g., 95%).</li>
+                      <li>Knee detection: look for elbow in singular value decay.</li>
+                      <li>Task-driven: tune k for PSNR/SSIM target rather than fixed percent.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-purple-400">Algorithms & Variants</h3>
+                  <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                    <h4 className="text-lg font-semibold text-yellow-400 mb-2">Randomized SVD (high-level)</h4>
+                    <ol className="text-sm text-gray-400 list-decimal list-inside space-y-1">
+                      <li>Project A to a low-dimensional subspace with a random matrix Ω.</li>
+                      <li>Orthogonalize Y = AΩ to get Q.</li>
+                      <li>Compute SVD of the small matrix B = QᵀA, then map back: A ≈ Q (Ū Σ Vᵀ).</li>
+                    </ol>
+                    <p className="text-xs text-gray-500 mt-2">Gives near-optimal low-rank approximations with far less compute on large matrices.</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                    <h4 className="text-lg font-semibold text-red-400 mb-2">Limitations</h4>
+                    <ul className="text-sm text-gray-400 list-disc list-inside space-y-1">
+                      <li>Global low-rank may struggle with textures or sharp, repeated patterns.</li>
+                      <li>Color bleeding if channels are compressed very differently.</li>
+                      <li>Not entropy-coded by itself; consider pairing with quantization/zip.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
+                <h3 className="text-xl font-bold text-green-400 mb-3">Practical Tips</h3>
+                <ul className="text-sm text-gray-300 list-disc list-inside space-y-2">
+                  <li>Normalize image data to [0,1] and handle color channels consistently.</li>
+                  <li>Precompute SVD once per image; reuse factors for slider interactions.</li>
+                  <li>Cap compute resolution (e.g., 256×256) for interactivity; upscale display separately if needed.</li>
+                  <li>Use web workers to avoid blocking the main thread.</li>
+                </ul>
               </div>
             </motion.div>
           )}

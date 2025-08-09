@@ -49,6 +49,7 @@ _A client-side web application demonstrating real-time SVD image compression. Th
 - [Academic License and Usage](#academic-license-and-usage)
 - [Academic Acknowledgments](#academic-acknowledgments)
 - [Support](#support)
+- [Performance Optimizations](#performance-optimizations)
 
 ## Academic Project Overview
 
@@ -411,6 +412,97 @@ npm run start
 
 </details>
 
+## Performance Evolution (Lighthouse)
+
+This section tracks Lighthouse performance over time and highlights optimizations made to the app.
+
+### Previous Production (svd-wheat.vercel.app)
+
+- Global mobile performance (v12.6.0): **43–57 / 100** across regions
+- Typical metrics (mobile):
+  - **FCP**: ~1.1–1.4s
+  - **LCP**: ~3.3–5.0s
+  - **TBT**: ~11.7–18.3s
+  - **CLS**: 0
+
+### Current Local Production Build (this repo)
+
+Desktop (prod, Lighthouse categories):
+- Performance: **82**
+- Accessibility: **84**
+- Best Practices: **100**
+- SEO: **100**
+
+Mobile (prod, Lighthouse categories):
+- Performance: **73**
+- Accessibility: **84**
+- Best Practices: **100**
+- SEO: **100**
+
+Reports saved locally as `lighthouse-prod-desktop.json` and `lighthouse-prod-mobile.json`.
+
+### What changed (high impact optimizations)
+
+- Removed duplicate work on initial upload: single SVD precompute + fast reconstruction
+- Parallelized per-channel reconstruction with web workers
+- Capped compute size to a predictable budget (computeDim <= 256)
+- Reduced SVD effort for startup (rank cap 24, iterations <= 20, power-iteration)
+- Debounced slider recompute; reconstruction uses precomputed factors
+- Preserved original aspect ratio and prevented layout shifts (CLS = 0)
+
+### Planned/Recommended for better LCP (< 4s)
+
+- Defer default sample processing until first interaction or idle time
+- Ensure a light, static hero is the LCP candidate; move heavy comparison below the fold
+- Show instant low-res preview (e.g., 128×128, rank ~12) and refine in background
+- content-visibility: auto on heavy sections; lazy-load non-critical assets
+
+### Reproducing Lighthouse locally
+
+```bash
+# Build and start production server
+npm run build
+npm run start &
+
+# Run Lighthouse (performance only) and save reports
+npx lighthouse http://localhost:3000 \
+  --only-categories=performance \
+  --output=json --output=html \
+  --output-path=./lighthouse/report-prod \
+  --chrome-flags="--headless=new --no-sandbox"
+```
+
+Reports are written to `compression-svd/lighthouse/report-prod.report.html` and `.json`.
+
+## Performance Optimizations
+
+Summary of applied optimizations that improved responsiveness and startup time:
+
+- React component optimizations:
+  - Memoization with `useMemo`, `useCallback`, and `memo` to reduce re-renders
+  - Code splitting via dynamic imports for heavy sections
+  - Lazy loading for below-the-fold content
+- SVD computation optimizations:
+  - Compute dimension capped to 256 with device-aware scaling
+  - Single SVD precompute then fast reconstructions on slider changes
+  - Parallel channel work with Web Workers; better error handling
+- State and UI performance:
+  - Debounced slider updates
+  - Preserved aspect ratios; no layout shifts (stable CLS)
+  - Matrix visualization uses Canvas for color and a single `<pre>` text block for numbers
+- Bundle/runtime and config tweaks:
+  - Removed deprecated/minify flags causing build issues
+  - Split chunks tuning and removal of problematic `require('crypto')` cases
+  - Pruned unused files/assets and slide tooling
+
+Environment defaults (can be adjusted via `.env.local`):
+
+```
+NEXT_PUBLIC_WORKER_THREADS=4
+NEXT_PUBLIC_MAX_IMAGE_DIMENSION=2048
+NEXT_PUBLIC_COMPUTE_DIM=256
+```
+
 ## Architecture
 
 The application follows a modern client-side architecture with comprehensive browser-based processing:
@@ -598,33 +690,28 @@ https://github.com/tmarhguy/svd
 
 ## Academic Acknowledgments
 
+This is a final project for MATH 3120: Numerical Linear Algebra at the University of Pennsylvania.
+
+- Course instructor: Maxine Elena Calle — Mathematics Ph.D. student and NSF Graduate Research Fellow at the University of Pennsylvania. Research interests include algebraic topology, homotopy theory, and category theory, with an interest in mathematical visualization and communication. See profile: [web.sas.upenn.edu/callem](https://web.sas.upenn.edu/callem/)
+- Gratitude to teaching staff and classmates for a supportive learning environment
+
 ### Course and Institution
 
-- **MATH 3120: Numerical Linear Algebra** - Course framework and mathematical foundation
-- **University of Pennsylvania, School of Engineering and Applied Science** - Academic support and resources
-- **Department of Mathematics** - Theoretical background and course materials
-- **Computer Engineering Program** - Technical skills and software development training
-
-### Academic Contributors
-
-- **Course Instructor: Maxine Calle (she/her)** - [callem@sas.upenn.edu](mailto:callem@sas.upenn.edu) | [Faculty Profile](https://web.sas.upenn.edu/callem/) - Guidance on numerical linear algebra concepts and SVD theory
-- **Teaching Assistants** - Support with mathematical implementations and debugging
-- **Classmates and Study Groups** - Collaborative learning and concept discussions
-- **Academic Advisors** - Project guidance and educational goal alignment
+- **MATH 3120: Numerical Linear Algebra** — Course framework and mathematical foundation
+- **University of Pennsylvania, School of Engineering and Applied Science** — Academic context
 
 ### Technical Acknowledgments
 
-- **Next.js/React**: Modern web development frameworks for educational visualization
-- **TypeScript**: Type-safe development for mathematical applications
-- **Tailwind CSS**: Professional UI framework for academic presentation
-- **University Computing Resources**: Development and testing infrastructure
+- **Next.js/React** — Web UI and interactivity
+- **TypeScript** — Type-safe development
+- **Tailwind CSS** — Styling
+- **Web Workers & Canvas API** — In-browser computation and rendering
 
 ### Educational Resources
 
-- **Course Textbooks and Materials**: Theoretical foundation for SVD implementation
-- **Academic Papers**: Research references for advanced compression techniques
-- **Online Educational Platforms**: Supplementary learning materials
-- **Open Source Community**: Educational tools and mathematical libraries
+- Course materials and standard numerical linear algebra references
+- Academic papers on SVD and image compression
+- Open-source community resources used for learning
 
 ## Support & Community
 
@@ -666,10 +753,10 @@ https://github.com/tmarhguy/svd
 
 <div align="center">
 
-**⭐ Star this repository if you found this MATH 3120 final project helpful! ⭐**
+**Star this repository if you found this MATH 3120 final project helpful!**
 
 _Academic Final Project by [Tyrone Marhguy](https://github.com/tmarhguy) for MATH 3120: Numerical Linear Algebra_  
 _University of Pennsylvania, School of Engineering and Applied Science_  
-_Fall 2024 - Computer Engineering Class of 2028_
+_Fall 2025 - Computer Engineering Class of 2028_
 
 </div>

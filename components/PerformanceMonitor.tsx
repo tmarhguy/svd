@@ -142,7 +142,7 @@ export default function PerformanceMonitor({
                   <TrendingUp className="w-5 h-5 text-green-400" />
                 </div>
                 <div className={`text-lg font-bold ${getPerformanceColor(metrics.compressionRatio, 80)}`}>
-                  {metrics.compressionRatio.toFixed(1)}%
+                  {Math.round(metrics.compressionRatio)}%
                 </div>
                 <div className="text-xs text-gray-400">Compression</div>
               </div>
@@ -155,7 +155,7 @@ export default function PerformanceMonitor({
                   <Activity className="w-5 h-5 text-purple-400" />
                 </div>
                 <div className={`text-lg font-bold ${getPerformanceColor(metrics.qualityScore * 100, 90)}`}>
-                  {(metrics.qualityScore * 100).toFixed(1)}%
+                  {Math.round(metrics.qualityScore * 100)}%
                 </div>
                 <div className="text-xs text-gray-400">Quality</div>
               </div>

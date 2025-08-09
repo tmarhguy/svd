@@ -68,6 +68,8 @@ export default function CompressionComparison() {
                   src="/slides/assets/svg/compression-comparison.svg" 
                   alt="Compression Comparison" 
                   className="w-full h-full object-contain"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>

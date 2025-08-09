@@ -30,7 +30,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <link rel="preload" href="/ghanaimage-svd-data.json" as="fetch" crossOrigin="anonymous" />
+      </head>
       <body className={`${inter.className} space-bg cyber-grid-bg`}>
         {/* Matrix Rain Effect */}
         <div className="matrix-rain"></div>

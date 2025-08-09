@@ -53,7 +53,7 @@ export default function ProcessingProgressRing({
 
     const increment = diff * 0.1;
     setDisplayed(prev => prev + increment);
-  }, [progress, done, visible]);
+  }, [progress, done, visible, displayed]);
 
   // Reset when done
   useEffect(() => {

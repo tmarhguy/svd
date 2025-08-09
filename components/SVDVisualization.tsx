@@ -2,12 +2,11 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ArrowRight, Square, Layers, Zap } from "lucide-react";
-import Image from "next/image";
+import { Square, Layers, Zap } from "lucide-react";
 
 
 interface SVDVisualizationProps {
-  singularValues: any;
+  singularValues: number[] | null;
   currentRank: number;
   imageType: 'grayscale' | 'color';
 }

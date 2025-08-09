@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import type { ComponentType, SVGProps } from "react";
 import { 
   GraduationCap, 
   Mail, 
@@ -21,7 +22,7 @@ import {
 interface SocialLink {
   name: string;
   url: string;
-  icon: React.ComponentType<any>;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
   color: string;
   description: string;
 }

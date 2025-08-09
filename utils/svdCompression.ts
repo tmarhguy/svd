@@ -1,5 +1,5 @@
 // Robust client-side SVD compression utilities with advanced features
-import { runChannelSVDs } from './workerCoordinator';
+import { runChannelSVDs, runChannelReconstruct } from './workerCoordinator';
 
 export interface CompressionResult {
   compressedImage: string; // base64 data URL
@@ -35,6 +35,8 @@ export interface PrecomputedSVD {
   imageData: ImageData; // possibly resized for computation
   metadata: ImageMetadata;
   originalFileSize: number;
+  cacheKey?: string; // for caching optimization
+  timestamp?: number; // for cache invalidation
 }
 
 export interface CompressionOptions {
@@ -58,10 +60,47 @@ const getEnvNumber = (name: string, fallback: number): number => {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
-const DEFAULT_FILE_SIZE_LIMIT = getEnvNumber('NEXT_PUBLIC_FILE_SIZE_LIMIT', 50 * 1024 * 1024); // 50MB
-const DEFAULT_MAX_LOAD_DIM = getEnvNumber('NEXT_PUBLIC_MAX_LOAD_DIM', 4096); // clamp decode+canvas
-const DEFAULT_COMPUTE_DIM = getEnvNumber('NEXT_PUBLIC_COMPUTE_DIM', 512);
-const DEFAULT_PREVIEW_DIM = getEnvNumber('NEXT_PUBLIC_PREVIEW_DIM', 256);
+// Simple cache for precomputed SVD factors (in-memory only)
+const svdCache = new Map<string, PrecomputedSVD>();
+const CACHE_MAX_SIZE = 5; // Keep last 5 computations
+const CACHE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+
+const generateCacheKey = (file: File, options: CompressionOptions): string => {
+  const key = `${file.name}_${file.size}_${file.lastModified}_${options.rank || 30}_${options.algorithm || 'power-iteration'}`;
+  return btoa(key).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
+};
+
+const getCachedSVD = (cacheKey: string): PrecomputedSVD | null => {
+  const cached = svdCache.get(cacheKey);
+  if (!cached) return null;
+  
+  // Check expiry
+  const now = Date.now();
+  if (cached.timestamp && (now - cached.timestamp) > CACHE_EXPIRY_MS) {
+    svdCache.delete(cacheKey);
+    return null;
+  }
+  
+  return cached;
+};
+
+const setCachedSVD = (cacheKey: string, precomputed: PrecomputedSVD): void => {
+  // Limit cache size
+  if (svdCache.size >= CACHE_MAX_SIZE) {
+    const firstKey = svdCache.keys().next().value;
+    if (firstKey) svdCache.delete(firstKey);
+  }
+  
+  precomputed.cacheKey = cacheKey;
+  precomputed.timestamp = Date.now();
+  svdCache.set(cacheKey, precomputed);
+};
+
+const DEFAULT_FILE_SIZE_LIMIT = getEnvNumber('NEXT_PUBLIC_FILE_SIZE_LIMIT', 20 * 1024 * 1024); // 20MB - reduced for web performance
+const DEFAULT_MAX_LOAD_DIM = getEnvNumber('NEXT_PUBLIC_MAX_LOAD_DIM', 1024); // reduced from 2048 for faster loading
+const DEFAULT_COMPUTE_DIM = getEnvNumber('NEXT_PUBLIC_COMPUTE_DIM', 256); // reduced from 384 for much faster processing
+const DEFAULT_PREVIEW_DIM = getEnvNumber('NEXT_PUBLIC_PREVIEW_DIM', 128); // reduced from 192 for instant previews
+const DEFAULT_MAX_COMPUTE_PIXELS = getEnvNumber('NEXT_PUBLIC_MAX_COMPUTE_PIXELS', 2_000_000); // ~2MP budget by default
 
 const getDeviceMemoryGb = (): number => {
   if (typeof navigator !== 'undefined' && (navigator as any)?.deviceMemory != null) {
@@ -73,11 +112,19 @@ const getDeviceMemoryGb = (): number => {
 
 const pickComputeDim = (): number => {
   const dm = getDeviceMemoryGb();
-  // scale compute dim by available memory
-  if (dm <= 2) return Math.min(DEFAULT_COMPUTE_DIM, 384);
-  if (dm <= 4) return Math.min(DEFAULT_COMPUTE_DIM, 512);
-  if (dm <= 8) return Math.max(DEFAULT_COMPUTE_DIM, 640);
-  return Math.max(DEFAULT_COMPUTE_DIM, 768);
+  // Keep compute dimension modest for responsiveness
+  if (dm <= 2) return 192;
+  if (dm <= 4) return 224;
+  return 256; // cap at 256 even on high-memory devices for speed
+};
+
+// Pick a pixel budget based on device memory to cap width*height for compute
+const pickComputePixelBudget = (): number => {
+  const dm = getDeviceMemoryGb();
+  if (dm <= 2) return Math.min(DEFAULT_MAX_COMPUTE_PIXELS, 1_000_000); // ~1MP
+  if (dm <= 4) return Math.min(DEFAULT_MAX_COMPUTE_PIXELS, 1_500_000); // ~1.5MP
+  if (dm <= 8) return Math.min(DEFAULT_MAX_COMPUTE_PIXELS, 2_500_000); // ~2.5MP
+  return Math.min(DEFAULT_MAX_COMPUTE_PIXELS, 4_000_000); // ~4MP
 };
 
 // Enhanced SVD implementation with multiple algorithms
@@ -256,65 +303,243 @@ export class ImageProcessor {
     this.ctx = this.canvas.getContext('2d')!;
   }
 
+  // Decode → optional center-crop (extreme aspect) → scale to pixel budget → ImageData + metadata
+  public async loadAndNormalize(
+    file: File,
+    options?: { maxPixels?: number; extremeAspectThreshold?: number }
+  ): Promise<{ imageData: ImageData; metadata: ImageMetadata }> {
+    // Cap pixel budget by computeDim^2 for consistent performance
+    const computeDim = pickComputeDim();
+    const defaultBudget = computeDim * computeDim; // e.g., 256×256
+    const pixelBudget = Math.min(options?.maxPixels ?? defaultBudget, defaultBudget);
+    const extremeAspectThreshold = options?.extremeAspectThreshold ?? 2.5;
+    const LARGE_CROP_SIDE = getEnvNumber('NEXT_PUBLIC_LARGE_CROP_SIDE', 1024);
+
+    // 1) Decode to image/bitmap without creating huge ImageData
+    let sourceWidth = 0;
+    let sourceHeight = 0;
+    let drawSource: CanvasImageSource;
+    let useBitmap = false;
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(file);
+      drawSource = bitmap;
+      sourceWidth = bitmap.width;
+      sourceHeight = bitmap.height;
+      useBitmap = true;
+    } else {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error('Failed to load image'));
+        el.src = URL.createObjectURL(file);
+      });
+      drawSource = img;
+      sourceWidth = img.width;
+      sourceHeight = img.height;
+    }
+
+    if (sourceWidth < 10 || sourceHeight < 10) {
+      throw new Error('Image dimensions too small. Minimum 10x10 pixels.');
+    }
+
+    // 2) Determine crop for extreme aspect or large square center crop (cap to 1024)
+    const aspect = sourceWidth / sourceHeight;
+    const isExtreme = aspect > extremeAspectThreshold || aspect < 1 / extremeAspectThreshold;
+    let cropX = 0, cropY = 0, cropW = sourceWidth, cropH = sourceHeight;
+    if (isExtreme) {
+      const side = Math.min(sourceWidth, sourceHeight);
+      const capped = Math.min(side, LARGE_CROP_SIDE);
+      cropX = Math.floor((sourceWidth - capped) / 2);
+      cropY = Math.floor((sourceHeight - capped) / 2);
+      cropW = capped;
+      cropH = capped;
+    }
+
+    // 3) Compute target size to fit pixel budget while preserving aspect
+    const cropAspect = cropW / cropH;
+    const targetH = Math.max(1, Math.floor(Math.sqrt(pixelBudget / cropAspect)));
+    const targetW = Math.max(1, Math.floor(targetH * cropAspect));
+
+    // 4) Draw scaled (and cropped if needed) directly, then read ImageData
+    this.canvas.width = targetW;
+    this.canvas.height = targetH;
+    this.ctx.clearRect(0, 0, targetW, targetH);
+    (this.ctx as any).imageSmoothingEnabled = true;
+    (this.ctx as any).imageSmoothingQuality = 'high';
+    this.ctx.drawImage(
+      drawSource,
+      cropX,
+      cropY,
+      cropW,
+      cropH,
+      0,
+      0,
+      targetW,
+      targetH
+    );
+    const imageData = this.ctx.getImageData(0, 0, targetW, targetH);
+    const metadata = this.detectMetadata(imageData, file.type || 'image/png');
+
+    // 5) Cleanup bitmap URL/handle
+    if (useBitmap && 'close' in drawSource && typeof (drawSource as any).close === 'function') {
+      try { (drawSource as any).close(); } catch {}
+    }
+
+    return { imageData, metadata };
+  }
+
+  // Fallback loader: always center-crop to a fixed square side (e.g., 1024)
+  public async loadAndForceSquare(file: File, side: number): Promise<{ imageData: ImageData; metadata: ImageMetadata }> {
+    let drawSource: CanvasImageSource;
+    let width = 0, height = 0;
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(file);
+      drawSource = bitmap;
+      width = bitmap.width;
+      height = bitmap.height;
+    } else {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error('Failed to load image'));
+        el.src = URL.createObjectURL(file);
+      });
+      drawSource = img;
+      width = img.width;
+      height = img.height;
+    }
+    const cropX = Math.max(0, Math.floor((width - side) / 2));
+    const cropY = Math.max(0, Math.floor((height - side) / 2));
+    this.canvas.width = side;
+    this.canvas.height = side;
+    this.ctx.clearRect(0, 0, side, side);
+    (this.ctx as any).imageSmoothingEnabled = true;
+    (this.ctx as any).imageSmoothingQuality = 'high';
+    this.ctx.drawImage(drawSource, cropX, cropY, Math.min(side, width), Math.min(side, height), 0, 0, side, side);
+    const imageData = this.ctx.getImageData(0, 0, side, side);
+    const metadata = this.detectMetadata(imageData, file.type || 'image/png');
+    return { imageData, metadata };
+  }
+
   // Load and validate image
   public async loadImage(file: File): Promise<{ imageData: ImageData; metadata: ImageMetadata }> {
+    // Prefer imageBitmap decode when available (faster, lower memory)
+    if (typeof createImageBitmap === 'function') {
+      try {
+        const bitmap = await createImageBitmap(file);
+
+        if (bitmap.width < 10 || bitmap.height < 10) {
+          throw new Error('Image dimensions too small. Minimum 10x10 pixels.');
+        }
+
+        this.canvas.width = bitmap.width;
+        this.canvas.height = bitmap.height;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.drawImage(bitmap, 0, 0);
+        const imageData = this.ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+        const metadata = this.detectMetadata(imageData, file.type || 'image/png');
+        bitmap.close();
+        URL.revokeObjectURL(URL.createObjectURL(file)); // Clean up blob URL
+        return { imageData, metadata };
+      } catch {
+        // Fall through to HTMLImageElement path
+      }
+    }
+
     return new Promise((resolve, reject) => {
       const img = new Image();
-      
       img.onload = () => {
         try {
-          // Validate image dimensions (very large images will be downscaled later)
-          if (img.width > DEFAULT_MAX_LOAD_DIM || img.height > DEFAULT_MAX_LOAD_DIM) {
-            throw new Error(`Image dimensions too large. Maximum ${DEFAULT_MAX_LOAD_DIM}x${DEFAULT_MAX_LOAD_DIM} pixels.`);
-          }
-
           if (img.width < 10 || img.height < 10) {
             throw new Error('Image dimensions too small. Minimum 10x10 pixels.');
           }
-
           this.canvas.width = img.width;
           this.canvas.height = img.height;
           this.ctx.drawImage(img, 0, 0);
-
           const imageData = this.ctx.getImageData(0, 0, img.width, img.height);
-          const data: Uint8ClampedArray = imageData.data as Uint8ClampedArray;
-
-          // Detect color space
-          let hasAlpha = false;
-          let hasColor = false;
-          
-          for (let i = 0; i < data.length; i += 4) {
-            if ((data[i + 3] ?? 255) < 255) hasAlpha = true;
-            if ((data[i] ?? 0) !== (data[i + 1] ?? 0) || (data[i] ?? 0) !== (data[i + 2] ?? 0)) hasColor = true;
-          }
-
-          const colorSpace: 'grayscale' | 'rgb' | 'rgba' = hasAlpha ? 'rgba' : hasColor ? 'rgb' : 'grayscale';
-          const channels = colorSpace === 'rgba' ? 4 : colorSpace === 'rgb' ? 3 : 1;
-          const maxRank = Math.min(img.width, img.height);
-
-          const metadata: ImageMetadata = {
-            width: img.width,
-            height: img.height,
-            channels,
-            format: file.type || 'image/png',
-            colorSpace,
-            maxRank,
-            optimalRank: Math.min(maxRank, Math.floor(maxRank * 0.1)) // 10% of max rank
-          };
-
+          const metadata = this.detectMetadata(imageData, file.type || 'image/png');
           resolve({ imageData, metadata });
-
         } catch (err) {
           reject(err);
         }
       };
-
-      img.onerror = () => {
-        reject(new Error('Failed to load image. Please ensure it\'s a valid image file.'));
-      };
-
+      img.onerror = () => reject(new Error('Failed to load image. Please ensure it\'s a valid image file.'));
       img.src = URL.createObjectURL(file);
     });
+  }
+
+  private detectMetadata(imageData: ImageData, format: string): ImageMetadata {
+    const data: Uint8ClampedArray = imageData.data as Uint8ClampedArray;
+    let hasAlpha = false;
+    let hasColor = false;
+    for (let i = 0; i < data.length; i += 4) {
+      if ((data[i + 3] ?? 255) < 255) hasAlpha = true;
+      if ((data[i] ?? 0) !== (data[i + 1] ?? 0) || (data[i] ?? 0) !== (data[i + 2] ?? 0)) hasColor = true;
+    }
+    const colorSpace: 'grayscale' | 'rgb' | 'rgba' = hasAlpha ? 'rgba' : hasColor ? 'rgb' : 'grayscale';
+    const channels = colorSpace === 'rgba' ? 4 : colorSpace === 'rgb' ? 3 : 1;
+    const maxRank = Math.min(imageData.width, imageData.height);
+    return {
+      width: imageData.width,
+      height: imageData.height,
+      channels,
+      format,
+      colorSpace,
+      maxRank,
+      optimalRank: Math.min(maxRank, Math.floor(maxRank * 0.1))
+    };
+  }
+
+  // Center-crop to a square (1:1) using the smaller dimension
+  public cropToSquare(imageData: ImageData): ImageData {
+    const { width: ow, height: oh } = imageData;
+    if (ow === oh) return imageData;
+
+    const side = Math.min(ow, oh);
+    const sx = Math.floor((ow - side) / 2);
+    const sy = Math.floor((oh - side) / 2);
+
+    // Draw source into a working canvas first
+    const srcCanvas = document.createElement('canvas');
+    const srcCtx = srcCanvas.getContext('2d')!;
+    srcCanvas.width = ow;
+    srcCanvas.height = oh;
+    srcCtx.putImageData(imageData, 0, 0);
+
+    // Crop into our internal canvas
+    this.canvas.width = side;
+    this.canvas.height = side;
+    this.ctx.clearRect(0, 0, side, side);
+    this.ctx.drawImage(srcCanvas, sx, sy, side, side, 0, 0, side, side);
+
+    return this.ctx.getImageData(0, 0, side, side);
+  }
+
+  // Resize ImageData to fit within a max pixel budget while preserving aspect ratio
+  public resizeToFitPixels(imageData: ImageData, maxPixels: number): { imageData: ImageData; width: number; height: number; scale: number } {
+    const { width: ow, height: oh } = imageData;
+    const currentPixels = ow * oh;
+    if (currentPixels <= maxPixels) {
+      return { imageData, width: ow, height: oh, scale: 1 };
+    }
+    const aspect = ow / oh;
+    const targetHeight = Math.max(1, Math.floor(Math.sqrt(maxPixels / aspect)));
+    const targetWidth = Math.max(1, Math.floor(targetHeight * aspect));
+
+    const srcCanvas = document.createElement('canvas');
+    const srcCtx = srcCanvas.getContext('2d')!;
+    srcCanvas.width = ow;
+    srcCanvas.height = oh;
+    srcCtx.putImageData(imageData, 0, 0);
+
+    this.canvas.width = targetWidth;
+    this.canvas.height = targetHeight;
+    this.ctx.clearRect(0, 0, targetWidth, targetHeight);
+    (this.ctx as any).imageSmoothingEnabled = true;
+    (this.ctx as any).imageSmoothingQuality = 'high';
+    this.ctx.drawImage(srcCanvas, 0, 0, ow, oh, 0, 0, targetWidth, targetHeight);
+    const resized = this.ctx.getImageData(0, 0, targetWidth, targetHeight);
+    return { imageData: resized, width: targetWidth, height: targetHeight, scale: targetWidth / ow };
   }
 
   // Convert image data to matrix format
@@ -360,7 +585,8 @@ export class ImageProcessor {
 
   // Convert matrix back to image data
   public matrixToImageData(matrices: number[][][], originalImageData: ImageData): ImageData {
-    const { width, height } = originalImageData;
+    const width = originalImageData.width;
+    const height = originalImageData.height;
     const newData = new Uint8ClampedArray(originalImageData.data.length);
 
     if (matrices.length === 1) {
@@ -397,36 +623,6 @@ export class ImageProcessor {
     }
 
     return new ImageData(newData, width, height);
-  }
-
-  // Resize ImageData to fit within maxDim while preserving aspect ratio
-  public resizeImageData(imageData: ImageData, maxDim: number): { imageData: ImageData; width: number; height: number; scale: number } {
-    const { width: ow, height: oh } = imageData;
-    const maxOrig = Math.max(ow, oh);
-    if (maxOrig <= maxDim) {
-      return { imageData, width: ow, height: oh, scale: 1 };
-    }
-
-    const scale = maxDim / maxOrig;
-    const nw = Math.max(1, Math.floor(ow * scale));
-    const nh = Math.max(1, Math.floor(oh * scale));
-
-    const srcCanvas = document.createElement('canvas');
-    const srcCtx = srcCanvas.getContext('2d')!;
-    srcCanvas.width = ow;
-    srcCanvas.height = oh;
-    srcCtx.putImageData(imageData, 0, 0);
-
-    this.canvas.width = nw;
-    this.canvas.height = nh;
-    this.ctx.clearRect(0, 0, nw, nh);
-    // Use high-quality scaling when available
-    (this.ctx as any).imageSmoothingEnabled = true;
-    (this.ctx as any).imageSmoothingQuality = 'high';
-    this.ctx.drawImage(srcCanvas, 0, 0, ow, oh, 0, 0, nw, nh);
-
-    const resized = this.ctx.getImageData(0, 0, nw, nh);
-    return { imageData: resized, width: nw, height: nh, scale };
   }
 
   // Check if image is grayscale
@@ -486,33 +682,43 @@ export async function compressImage(
       throw new Error(`File too large. Maximum size is ${Math.round(DEFAULT_FILE_SIZE_LIMIT / (1024*1024))}MB.`);
     }
 
-    // Set default options
+    // Set default options (optimized for online performance)
     const opts: Required<CompressionOptions> = {
-      rank: options.rank || 50,
+      rank: options.rank || 30, // reduced from 50 for faster processing
       quality: options.quality ?? 0.8,
       maxSize: options.maxSize || 5 * 1024 * 1024, // 5MB
       algorithm: options.algorithm || 'power-iteration',
       colorMode: options.colorMode || 'auto',
       colorMix: options.colorMix ?? 1,
       optimization: options.optimization || 'balanced',
-      errorThreshold: options.errorThreshold || 1e-6,
-      maxIterations: options.maxIterations || 50,
+      errorThreshold: options.errorThreshold || 1e-5, // slightly relaxed for speed
+      maxIterations: options.maxIterations || 35, // reduced from 50 for faster convergence
       engine: options.engine || 'truncated'
     };
 
-    // Process image
+    // Process image: decode → optional crop (extreme aspect) → scale to pixel budget in one pass
     const processor = new ImageProcessor();
-    const { imageData: loadedImageData, metadata: loadedMetadata } = await processor.loadImage(imageFile);
-
-    // Downscale large images to keep computation on main thread manageable
-    const computeDim = pickComputeDim();
-    const { imageData, width: effWidth, height: effHeight } = processor.resizeImageData(loadedImageData, computeDim);
+    let imageData: ImageData;
+    let loadedMetadata: ImageMetadata;
+    try {
+      const loaded = await processor.loadAndNormalize(imageFile, {
+        maxPixels: pickComputePixelBudget(),
+        extremeAspectThreshold: 2.5
+      });
+      imageData = loaded.imageData;
+      loadedMetadata = loaded.metadata;
+    } catch (e) {
+      // Fallback: force square center-crop at 1024
+      const loaded = await processor.loadAndForceSquare(imageFile, getEnvNumber('NEXT_PUBLIC_LARGE_CROP_SIDE', 1024));
+      imageData = loaded.imageData;
+      loadedMetadata = loaded.metadata;
+    }
     const metadata: ImageMetadata = {
       ...loadedMetadata,
-      width: effWidth,
-      height: effHeight,
-      maxRank: Math.min(effWidth, effHeight),
-      optimalRank: Math.min(Math.min(effWidth, effHeight), Math.floor(Math.min(effWidth, effHeight) * 0.1))
+      width: imageData.width,
+      height: imageData.height,
+      maxRank: Math.min(imageData.width, imageData.height),
+      optimalRank: Math.min(Math.min(imageData.width, imageData.height), Math.floor(Math.min(imageData.width, imageData.height) * 0.1))
     };
     
     // Convert to matrices
@@ -755,7 +961,7 @@ export async function compressImage(
 export async function getSingularValues(imageFile: File): Promise<{ grayscale: number[]; rgb?: number[][]; metadata: ImageMetadata }> {
   try {
     const processor = new ImageProcessor();
-    const { imageData, metadata } = await processor.loadImage(imageFile);
+    const { imageData, metadata } = await processor.loadAndNormalize(imageFile, { maxPixels: DEFAULT_PREVIEW_DIM * DEFAULT_PREVIEW_DIM });
     const matrices = processor.imageDataToMatrix(imageData, 'auto');
 
     // Downscale matrices for quick preview to avoid heavy computation
@@ -888,6 +1094,40 @@ export function estimateOptimalRank(singularValues: number[], targetQuality: num
   return Math.max(1, Math.min(singularValues.length, finalRank));
 }
 
+// Applies color mixing to reconstructed RGB matrices
+function applyColorMix(matrices: number[][][], colorMix: number): number[][][] {
+  if (matrices.length !== 3 || colorMix >= 1) {
+    return matrices;
+  }
+
+  const [rMatrix, gMatrix, bMatrix] = matrices;
+  const height = rMatrix.length;
+  const width = rMatrix[0]?.length ?? 0;
+
+  if (height === 0 || width === 0) {
+    return matrices;
+  }
+
+  const mixedR = Array(height).fill(0).map(() => Array(width).fill(0));
+  const mixedG = Array(height).fill(0).map(() => Array(width).fill(0));
+  const mixedB = Array(height).fill(0).map(() => Array(width).fill(0));
+
+  for (let i = 0; i < height; i++) {
+    for (let j = 0; j < width; j++) {
+      const r = rMatrix[i][j];
+      const g = gMatrix[i][j];
+      const b = bMatrix[i][j];
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+      
+      mixedR[i][j] = luminance * (1 - colorMix) + r * colorMix;
+      mixedG[i][j] = luminance * (1 - colorMix) + g * colorMix;
+      mixedB[i][j] = luminance * (1 - colorMix) + b * colorMix;
+    }
+  }
+
+  return [mixedR, mixedG, mixedB];
+}
+
 // Utility function to calculate compression efficiency
 export function calculateCompressionEfficiency(
   originalSize: number,
@@ -916,44 +1156,96 @@ export async function precomputeSVD(
   options: CompressionOptions = {},
   topK?: number
 ): Promise<PrecomputedSVD> {
-  // Defaults mirroring compressImage
+  // Defaults mirroring compressImage (optimized for performance)
   const opts: Required<CompressionOptions> = {
-    rank: options.rank || 50,
+    rank: options.rank || 30, // reduced for faster processing
     quality: options.quality ?? 0.8,
     maxSize: options.maxSize || 5 * 1024 * 1024,
     algorithm: options.algorithm || 'power-iteration',
     colorMode: options.colorMode || 'auto',
     colorMix: options.colorMix ?? 1,
     optimization: options.optimization || 'balanced',
-    errorThreshold: options.errorThreshold || 1e-6,
-    maxIterations: options.maxIterations || 50,
+    errorThreshold: options.errorThreshold || 1e-5, // slightly relaxed for speed
+    maxIterations: options.maxIterations || 35, // reduced for faster convergence
     engine: options.engine || 'truncated'
   };
 
+  // Check cache first
+  const cacheKey = generateCacheKey(imageFile, opts);
+  const cached = getCachedSVD(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const processor = new ImageProcessor();
-  const { imageData: loadedImageData, metadata: loadedMetadata } = await processor.loadImage(imageFile);
-  const MAX_COMPRESS_DIM = 512;
-  const { imageData, width: effWidth, height: effHeight } = processor.resizeImageData(loadedImageData, MAX_COMPRESS_DIM);
+  let imageData: ImageData;
+  let loadedMetadata: ImageMetadata;
+  try {
+    const { imageData, metadata: loadedMetadata } = await processor.loadAndNormalize(imageFile, {
+      maxPixels: undefined, // let loadAndNormalize cap to computeDim^2
+      extremeAspectThreshold: 2.5
+    });
+    const metadata: ImageMetadata = {
+      ...loadedMetadata,
+      width: imageData.width,
+      height: imageData.height,
+      maxRank: Math.min(imageData.width, imageData.height),
+      optimalRank: Math.min(Math.min(imageData.width, imageData.height), Math.floor(Math.min(imageData.width, imageData.height) * 0.1))
+    };
+ 
+    const matrices = processor.imageDataToMatrix(imageData, opts.colorMode);
+    // Compute only up to requested rank (with a reasonable cap for stability)
+    const rankCap = 24; // lower cap for better responsiveness
+    const desiredRank = Math.max(1, Math.min(metadata.maxRank, topK ?? opts.rank ?? 30));
+    const rankToCompute = Math.min(desiredRank, rankCap);
+ 
+    // Prefer workers for precompute
+    const factors: SVDRawResult[] = await runChannelSVDs(matrices, { ...opts, rank: rankToCompute, algorithm: 'power-iteration', maxIterations: Math.min(20, opts.maxIterations) });
+
+    const result: PrecomputedSVD = {
+      factors,
+      imageData,
+      metadata,
+      originalFileSize: imageFile.size
+    };
+
+    // Cache the result
+    setCachedSVD(cacheKey, result);
+    
+    return result;
+  } catch (e) {
+    const loaded = await processor.loadAndForceSquare(imageFile, getEnvNumber('NEXT_PUBLIC_LARGE_CROP_SIDE', 1024));
+    imageData = loaded.imageData;
+    loadedMetadata = loaded.metadata;
+  }
   const metadata: ImageMetadata = {
     ...loadedMetadata,
-    width: effWidth,
-    height: effHeight,
-    maxRank: Math.min(effWidth, effHeight),
-    optimalRank: Math.min(Math.min(effWidth, effHeight), Math.floor(Math.min(effWidth, effHeight) * 0.1))
+    width: imageData.width,
+    height: imageData.height,
+    maxRank: Math.min(imageData.width, imageData.height),
+    optimalRank: Math.min(Math.min(imageData.width, imageData.height), Math.floor(Math.min(imageData.width, imageData.height) * 0.1))
   };
 
   const matrices = processor.imageDataToMatrix(imageData, opts.colorMode);
-  const rankToCompute = Math.max(1, Math.min(metadata.maxRank, topK ?? Math.max(opts.rank, 50), 100));
+  // Compute only up to requested rank (with a reasonable cap for stability)
+  const rankCap = 40; // adjust if needed for quality vs speed
+  const desiredRank = Math.max(1, Math.min(metadata.maxRank, topK ?? opts.rank ?? 30));
+  const rankToCompute = Math.min(desiredRank, rankCap);
 
   // Prefer workers for precompute
   const factors: SVDRawResult[] = await runChannelSVDs(matrices, { ...opts, rank: rankToCompute });
 
-  return {
+  const result: PrecomputedSVD = {
     factors,
     imageData,
     metadata,
     originalFileSize: imageFile.size
   };
+
+  // Cache the result
+  setCachedSVD(cacheKey, result);
+  
+  return result;
 }
 
 // Reconstruct from precomputed factors using rank k, producing a full CompressionResult
@@ -979,73 +1271,25 @@ export async function reconstructFromPrecomputed(
   const { factors, imageData, metadata } = precomputed;
   const targetK = Math.max(1, Math.min(metadata.maxRank, k));
 
-  // Reconstruct each channel via classic truncated SVD
-  const compressedMatrices: number[][][] = [];
-  for (const { U, S, Vt } of factors) {
-    const kk = Math.min(targetK, S.length);
-    const channel: number[][] = [];
-    for (let i = 0; i < U.length; i++) {
-      const Ui = U[i] as number[];
-      const outRow = (channel[i] ||= [] as number[]);
-      const vt0Len = (Vt[0] as number[] | undefined)?.length ?? 0;
-      for (let j = 0; j < vt0Len; j++) {
-        let sum = 0;
-        for (let t = 0; t < kk; t++) {
-          const St = S[t] ?? 0;
-          const Vtt = Vt[t] as number[] | undefined;
-          sum += (Ui[t] ?? 0) * St * (Vtt?.[j] ?? 0);
-        }
-        outRow[j] = sum; // clamp later after colorMix blending
-      }
-    }
-    compressedMatrices.push(channel);
-  }
+  // Ensure we have a valid ImageData to write into and for metrics
+  const safeImageData: ImageData = imageData || new ImageData(
+    new Uint8ClampedArray(Math.max(1, metadata.width) * Math.max(1, metadata.height) * 4),
+    Math.max(1, metadata.width),
+    Math.max(1, metadata.height)
+  );
+
+  // Reconstruct each channel in parallel via workers
+  const compressedMatrices: number[][][] = await runChannelReconstruct(factors, targetK);
 
   const processor = new ImageProcessor();
   // Apply colorMix blending for reconstructed channels
-  let mixedMatrices = compressedMatrices;
-  if (compressedMatrices.length === 3 && opts.colorMix < 1) {
-    const first = compressedMatrices[0] as number[][] | undefined;
-    const height = first?.length ?? 0;
-    const width = (first?.[0] as number[] | undefined)?.length ?? 0;
-    if (height > 0 && width > 0) {
-      const Y: number[][] = Array(height).fill(0).map(() => Array(width).fill(0));
-      for (let i = 0; i < height; i++) {
-        const Yi = Y[i] as number[];
-        for (let j = 0; j < width; j++) {
-          const r = compressedMatrices[0]?.[i]?.[j] ?? 0;
-          const g = compressedMatrices[1]?.[i]?.[j] ?? 0;
-          const b = compressedMatrices[2]?.[i]?.[j] ?? 0;
-          Yi[j] = 0.299 * r + 0.587 * g + 0.114 * b;
-        }
-      }
-      const mix = Math.max(0, Math.min(1, opts.colorMix));
-      const outR: number[][] = Array(height).fill(0).map(() => Array(width).fill(0));
-      const outG: number[][] = Array(height).fill(0).map(() => Array(width).fill(0));
-      const outB: number[][] = Array(height).fill(0).map(() => Array(width).fill(0));
-      for (let i = 0; i < height; i++) {
-        const outRi = outR[i] as number[];
-        const outGi = outG[i] as number[];
-        const outBi = outB[i] as number[];
-        const Yi = Y[i] as number[];
-        for (let j = 0; j < width; j++) {
-          const r = compressedMatrices[0]?.[i]?.[j] ?? 0;
-          const g = compressedMatrices[1]?.[i]?.[j] ?? 0;
-          const b = compressedMatrices[2]?.[i]?.[j] ?? 0;
-          const y = Yi[j] ?? 0;
-          outRi[j] = y * (1 - mix) + r * mix;
-          outGi[j] = y * (1 - mix) + g * mix;
-          outBi[j] = y * (1 - mix) + b * mix;
-        }
-      }
-      mixedMatrices = [outR, outG, outB];
-    }
-  }
+  const mixedMatrices = applyColorMix(compressedMatrices, opts.colorMix);
+  
   // Clamp after colorMix blending for correct range
   const clampedMatrices = mixedMatrices.map((mat) =>
     mat.map((row) => row.map((v) => Math.max(0, Math.min(255, v))))
   );
-  const compressedImageData = processor.matrixToImageData(clampedMatrices, imageData);
+  const compressedImageData = processor.matrixToImageData(clampedMatrices, safeImageData);
 
   // Convert to base64 JPEG with size constraint
   const canvas = document.createElement('canvas');
@@ -1071,12 +1315,12 @@ export async function reconstructFromPrecomputed(
   const originalSize = precomputed.originalFileSize;
   const compressedSize = Math.ceil(compressedImage.length * 0.75);
   const compressionRatio = ((originalSize - compressedSize) / originalSize) * 100;
-  const qualityScore = processor.calculateQuality(imageData, compressedImageData);
+  const qualityScore = processor.calculateQuality(safeImageData, compressedImageData);
 
   // Calculate reconstruction error
   let totalError = 0;
   // Derive original matrices from imageData for error computation
-  const originalMatrices = processor.imageDataToMatrix(imageData, factors.length === 1 ? 'grayscale' : 'rgb');
+  const originalMatrices = processor.imageDataToMatrix(safeImageData, factors.length === 1 ? 'grayscale' : 'rgb');
   for (let c = 0; c < compressedMatrices.length; c++) {
     const oc = originalMatrices[c] as number[][] | undefined;
     const cc = compressedMatrices[c] as number[][] | undefined;

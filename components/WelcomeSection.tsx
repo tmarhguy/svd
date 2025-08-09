@@ -3,119 +3,109 @@
 import { motion } from "framer-motion";
 import { Rocket, Brain, Zap, Target } from "lucide-react";
 
-
 export default function WelcomeSection() {
   return (
     <section id="welcome" className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background Effects */}
+      {/* Simplified Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-space-900 via-space-800 to-space-900"></div>
-      <div className="absolute inset-0 bg-cyber-grid opacity-20"></div>
+      <div className="absolute inset-0 bg-cyber-grid opacity-10"></div>
       
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-neon-400 rounded-full animate-float opacity-60"></div>
-        <div className="absolute top-3/4 right-1/4 w-2 h-2 bg-plasma-400 rounded-full animate-float opacity-80" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-3/4 w-1.5 h-1.5 bg-matrix-400 rounded-full animate-float opacity-40" style={{ animationDelay: '4s' }}></div>
-        <div className="absolute bottom-1/4 left-1/2 w-1 h-1 bg-quantum-400 rounded-full animate-float opacity-70" style={{ animationDelay: '1s' }}></div>
-      </div>
-
       <div className="relative z-10 text-center max-w-6xl mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 0.5 }}
           className="space-y-8"
         >
           {/* Main Title */}
           <div className="space-y-6">
             <motion.h1 
               className="text-6xl md:text-8xl font-bold neon-text"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
             >
               SVD
             </motion.h1>
             <motion.h2 
               className="text-2xl md:text-4xl font-semibold hologram-text"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.4 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
               Quantum Image Compression
             </motion.h2>
             <motion.p 
               className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.6 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
               Experience the future of image compression through Singular Value Decomposition. 
               Discover how mathematics transforms digital images into efficient quantum representations.
             </motion.p>
           </div>
 
-          {/* Enhanced Welcome Animation */}
+          {/* Simplified Features Grid */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.8 }}
-            className="mb-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
           >
-            <div className="w-full h-32 bg-gradient-to-br from-space-800 to-space-700 rounded-xl flex items-center justify-center">
-              <div className="text-center text-gray-400">
-                <div className="text-4xl mb-2 neon-text">Explore</div>
-                <div className="text-sm">Welcome to SVD Compression</div>
-              </div>
+            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-6 rounded-xl border border-space-600">
+              <Rocket className="w-8 h-8 text-neon-400 mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">Ultra Fast</h3>
+              <p className="text-xs text-gray-400 mt-1">Lightning speed processing</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-6 rounded-xl border border-space-600">
+              <Brain className="w-8 h-8 text-plasma-400 mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">Linear Algebra</h3>
+              <p className="text-xs text-gray-400 mt-1">Applied SVD concepts</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-6 rounded-xl border border-space-600">
+              <Zap className="w-8 h-8 text-matrix-400 mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">High Quality</h3>
+              <p className="text-xs text-gray-400 mt-1">Preserve image fidelity</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-6 rounded-xl border border-space-600">
+              <Target className="w-8 h-8 text-quantum-400 mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">Precise Control</h3>
+              <p className="text-xs text-gray-400 mt-1">Fine-tune compression</p>
             </div>
           </motion.div>
 
-          {/* Interactive Preview */}
+          {/* CTA Button */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1.0 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <div className="hologram-card p-6 rounded-xl text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-3 bg-gradient-to-r from-neon-500 to-plasma-500 rounded-xl">
-                  <Rocket className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold neon-text mb-2">Interactive Demo</h3>
-              <p className="text-sm text-gray-400">Upload images and see real-time compression</p>
-            </div>
+            <a
+              href="#demo"
+              className="inline-flex items-center space-x-2 plasma-button"
+            >
+              <span>Start Compressing</span>
+              <Zap className="w-5 h-5" />
+            </a>
+          </motion.div>
 
-            <div className="hologram-card p-6 rounded-xl text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-3 bg-gradient-to-r from-matrix-500 to-neon-500 rounded-xl">
-                  <Brain className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold neon-text mb-2">Mathematical Foundation</h3>
-              <p className="text-sm text-gray-400">Understand the theory behind SVD</p>
+          {/* Scroll Indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mt-12"
+          >
+            <div className="animate-bounce">
+              <svg className="w-6 h-6 mx-auto text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+              </svg>
             </div>
-
-            <div className="hologram-card p-6 rounded-xl text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-3 bg-gradient-to-r from-plasma-500 to-quantum-500 rounded-xl">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold neon-text mb-2">Real-time Processing</h3>
-              <p className="text-sm text-gray-400">Watch compression happen instantly</p>
-            </div>
-
-            <div className="hologram-card p-6 rounded-xl text-center">
-              <div className="flex justify-center mb-4">
-                <div className="p-3 bg-gradient-to-r from-quantum-500 to-matrix-500 rounded-xl">
-                  <Target className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <h3 className="text-lg font-semibold neon-text mb-2">Quality Control</h3>
-              <p className="text-sm text-gray-400">Fine-tune compression parameters</p>
-            </div>
+            <p className="text-sm text-gray-400 mt-2">Scroll to explore</p>
           </motion.div>
         </motion.div>
       </div>
