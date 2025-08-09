@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "installCommand": "npm install --no-optional",
   "framework": "nextjs",
   "nodeVersion": "20.x",
   "regions": ["iad1"],
