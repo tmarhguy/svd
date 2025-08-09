@@ -7,7 +7,7 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --max-warnings 0",
+    "lint": "next lint",
     "lint:fix": "next lint --fix",
     "check-types": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
@@ -21,7 +21,6 @@
     "slides:open": "open slides/svd.html"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.537.0",
     "next": "^15.4.2",
@@ -30,23 +29,18 @@
     "react-dropzone": "^14.3.8"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@eslint/eslintrc": "^3.1.0",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
-    "@marp-team/marp-cli": "^4.2.2",
-    "@svgr/cli": "^8.1.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.31.0",
+    "eslint-config-next": "^15.4.2",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
-    "svgo": "^4.0.0",
     "tailwindcss": "^3.4.17",
-    "turbo": "^2.5.5",
     "typescript": "5.8.3"
   },
-  "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
   }
