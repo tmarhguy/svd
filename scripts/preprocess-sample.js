@@ -104,6 +104,12 @@ class NodeSVD {
 
 async function preprocessSampleImage() {
   console.log('🔄 Starting sample image preprocessing...');
+
+  // Skip in CI/Vercel to avoid native canvas dependency issues during cloud builds
+  if (process.env.VERCEL || process.env.CI) {
+    console.log('⏭️  Skipping preprocessing in CI/VERCEL environment');
+    return null;
+  }
   
   try {
     // Use the existing ghanaimage.jpg as the sample

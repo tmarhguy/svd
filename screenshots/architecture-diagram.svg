@@ -32,9 +32,9 @@
   <rect x="70" y="120" width="300" height="110" class="box" />
   <text x="85" y="145" class="label">React / Next.js UI (App Router)</text>
   <rect x="85" y="160" width="270" height="28" class="pill" />
-  <text x="100" y="179" class="small">Welcome, Controls, Performance Monitor</text>
+  <text x="100" y="179" class="small">Welcome, Controls, Monitor</text>
   <rect x="85" y="195" width="270" height="28" class="pill" />
-  <text x="100" y="214" class="small">Matrix Representation, Writeup, References</text>
+  <text x="100" y="214" class="small">Matrix, Writeup, References</text>
 
   <!-- Client: Orchestration -->
   <rect x="70" y="260" width="300" height="80" class="box" />
@@ -54,14 +54,17 @@
   <text x="415" y="145" class="label">Canvas API</text>
   <text x="415" y="165" class="small">Decode | Sample | Render</text>
   <rect x="415" y="180" width="310" height="28" class="pill" />
-  <text x="430" y="199" class="small">ImageData generation and channel visualization</text>
+  <text x="430" y="199" class="small">ImageData generation</text>
   <rect x="415" y="215" width="310" height="28" class="pill" />
   <text x="430" y="234" class="small">256×256 sampling, color/hue modes</text>
 
   <!-- Client: Assets -->
   <rect x="400" y="310" width="340" height="90" class="box" />
   <text x="415" y="335" class="label">Public Assets</text>
-  <text x="415" y="355" class="small">/public/ghanaimage.jpg, ghanaimage-svd-data.json</text>
+  <text x="415" y="355" class="small">
+    <tspan x="415" dy="0">/public/ghanaimage.jpg,</tspan>
+    <tspan x="415" dy="16">ghanaimage-svd-data.json</tspan>
+  </text>
 
   <!-- Server: Next.js / Hosting -->
   <rect x="810" y="120" width="320" height="110" class="box" />
@@ -93,8 +96,15 @@
   <text x="815" y="515" class="small">request / command</text>
   <rect x="795" y="530" width="14" height="2" fill="#34d399" />
   <text x="815" y="535" class="small">data / result</text>
-  <text x="795" y="560" class="small">All compute occurs in the browser. SVD factors are computed in web workers and re-used for fast reconstruction.</text>
-  <text x="795" y="580" class="small">Assets are served statically by Next.js. UI uses Tailwind + Framer Motion for interaction polish.</text>
+  <text x="795" y="560" class="small">
+    <tspan x="795" dy="0">All compute occurs in the browser.</tspan>
+    <tspan x="795" dy="16">SVD factors computed in web workers</tspan>
+    <tspan x="795" dy="16">and re-used for fast reconstruction.</tspan>
+  </text>
+  <text x="795" y="610" class="small">
+    <tspan x="795" dy="0">Assets served statically by Next.js.</tspan>
+    <tspan x="795" dy="16">UI uses Tailwind + Framer Motion.</tspan>
+  </text>
 
 </svg>
 
