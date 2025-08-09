@@ -36,3 +36,10 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+.vscode/
+.idea/
+*.log
+
+# Local reports/artifacts
+lighthouse-*.json
+*.report.html
