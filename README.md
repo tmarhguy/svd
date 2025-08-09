@@ -174,9 +174,39 @@ _Educational quiz interface designed to test student understanding of SVD concep
 
 ### System Architecture
 
-_Comprehensive system architecture diagram showing the client-side application structure, data flow, and component relationships. This technical overview demonstrates how mathematical algorithms are integrated into modern web applications, bridging academic theory with professional software development practices._
+Comprehensive system architecture showing client-side structure, data flow, and component relationships.
 
-![System Architecture](screenshots/architecture-diagram.svg)
+```mermaid
+graph TD
+  subgraph "Browser (Client)"
+    UI["React/Next.js UI (App Router)"]
+    CMP["Components (Matrix, Writeup, Controls)"]
+    CANVAS["Canvas API (decode/sample/render)"]
+    WW["Web Workers (svdWorker.ts)"]
+    SVDCORE["SVD Core (svdCore.ts)"]
+    SVDCOMP["Compression Orchestration (svdCompression.ts)"]
+    ASSETS["Public Assets (ghanaimage.jpg, ghanaimage-svd-data.json)"]
+  end
+
+  subgraph "Server/Hosting"
+    NEXT["Next.js Static Server (next start)"]
+    HOST["Hosting (Vercel or Node)"]
+  end
+
+  UI --> CMP
+  CMP -->|user actions| SVDCOMP
+  SVDCOMP -->|spawn| WW
+  WW -->|compute SVD / reconstruct| SVDCORE
+  WW -->|postMessage results| SVDCOMP
+  SVDCOMP -->|ImageData/data URL| CANVAS
+  SVDCOMP -->|fetch| ASSETS
+
+  NEXT -->|serve static| ASSETS
+  HOST --> NEXT
+
+  style UI stroke-dasharray: 3 3
+  style WW stroke-dasharray: 3 3
+```
 
 ### Compression Comparison Visualization
 
@@ -428,12 +458,14 @@ This section tracks Lighthouse performance over time and highlights optimization
 ### Current Local Production Build (this repo)
 
 Desktop (prod, Lighthouse categories):
+
 - Performance: **82**
 - Accessibility: **84**
 - Best Practices: **100**
 - SEO: **100**
 
 Mobile (prod, Lighthouse categories):
+
 - Performance: **73**
 - Accessibility: **84**
 - Best Practices: **100**
