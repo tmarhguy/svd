@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+  <defs>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #e5e7eb; }
+      .subtitle { font: 16px sans-serif; fill: #9ca3af; }
+      .label { font: 14px sans-serif; fill: #e5e7eb; }
+      .small { font: 12px monospace; fill: #cbd5e1; }
+      .box { fill: #0b1020; stroke: #334155; stroke-width: 2; rx: 10; }
+      .panel { fill: #111827; stroke: #374151; stroke-width: 2; rx: 12; }
+      .arrow { stroke: #60a5fa; stroke-width: 2; marker-end: url(#arrowhead); fill: none; }
+      .arrow2 { stroke: #34d399; stroke-width: 2; marker-end: url(#arrowhead); fill: none; }
+      .pill { fill: #0f172a; stroke: #475569; stroke-width: 1.5; rx: 8; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa" />
+    </marker>
+  </defs>
+
+  <rect width="1200" height="720" fill="#0a0f1c" />
+  <text x="600" y="40" class="title" text-anchor="middle">SVD Image Compression — System Architecture</text>
+
+  <!-- Client Panel -->
+  <rect x="40" y="70" width="720" height="580" class="panel" />
+  <text x="60" y="95" class="subtitle">Browser (Client)</text>
+
+  <!-- Server Panel -->
+  <rect x="780" y="70" width="380" height="580" class="panel" />
+  <text x="800" y="95" class="subtitle">Server / Hosting</text>
+
+  <!-- Client: UI and Components -->
+  <rect x="70" y="120" width="300" height="110" class="box" />
+  <text x="85" y="145" class="label">React / Next.js UI (App Router)</text>
+  <rect x="85" y="160" width="270" height="28" class="pill" />
+  <text x="100" y="179" class="small">Welcome, Controls, Performance Monitor</text>
+  <rect x="85" y="195" width="270" height="28" class="pill" />
+  <text x="100" y="214" class="small">Matrix Representation, Writeup, References</text>
+
+  <!-- Client: Orchestration -->
+  <rect x="70" y="260" width="300" height="80" class="box" />
+  <text x="85" y="285" class="label">Compression Orchestration</text>
+  <text x="85" y="305" class="small">utils/svdCompression.ts</text>
+
+  <!-- Client: Web Workers & Core -->
+  <rect x="70" y="360" width="300" height="120" class="box" />
+  <text x="85" y="385" class="label">Web Workers</text>
+  <text x="85" y="405" class="small">utils/svdWorker.ts</text>
+  <rect x="85" y="415" width="270" height="1" fill="#334155" />
+  <text x="85" y="435" class="label">SVD Core</text>
+  <text x="85" y="455" class="small">utils/svdCore.ts (power-iteration)</text>
+
+  <!-- Client: Canvas -->
+  <rect x="400" y="120" width="340" height="160" class="box" />
+  <text x="415" y="145" class="label">Canvas API</text>
+  <text x="415" y="165" class="small">Decode | Sample | Render</text>
+  <rect x="415" y="180" width="310" height="28" class="pill" />
+  <text x="430" y="199" class="small">ImageData generation and channel visualization</text>
+  <rect x="415" y="215" width="310" height="28" class="pill" />
+  <text x="430" y="234" class="small">256×256 sampling, color/hue modes</text>
+
+  <!-- Client: Assets -->
+  <rect x="400" y="310" width="340" height="90" class="box" />
+  <text x="415" y="335" class="label">Public Assets</text>
+  <text x="415" y="355" class="small">/public/ghanaimage.jpg, ghanaimage-svd-data.json</text>
+
+  <!-- Server: Next.js / Hosting -->
+  <rect x="810" y="120" width="320" height="110" class="box" />
+  <text x="825" y="145" class="label">Next.js Static Server</text>
+  <text x="825" y="165" class="small">next start</text>
+  <rect x="810" y="250" width="320" height="90" class="box" />
+  <text x="825" y="275" class="label">Hosting</text>
+  <text x="825" y="295" class="small">Vercel or Node runtime</text>
+
+  <!-- Flows -->
+  <!-- UI to Orchestration -->
+  <path d="M370 300 L400 300" class="arrow" />
+  <!-- Orchestration to Workers -->
+  <path d="M220 340 L220 360" class="arrow" />
+  <!-- Workers to Orchestrator (results) -->
+  <path d="M220 480 L220 520 L400 520" class="arrow2" />
+  <!-- Orchestration to Canvas -->
+  <path d="M370 200 L400 200" class="arrow" />
+  <!-- Orchestration to Assets (fetch) -->
+  <path d="M370 350 L400 350" class="arrow" />
+  <!-- Server serves assets -->
+  <path d="M740 355 L810 355" class="arrow" />
+  <path d="M970 230 L970 250" class="arrow" />
+
+  <!-- Legends -->
+  <rect x="780" y="470" width="350" height="160" class="box" />
+  <text x="795" y="495" class="label">Legend</text>
+  <rect x="795" y="510" width="14" height="2" fill="#60a5fa" />
+  <text x="815" y="515" class="small">request / command</text>
+  <rect x="795" y="530" width="14" height="2" fill="#34d399" />
+  <text x="815" y="535" class="small">data / result</text>
+  <text x="795" y="560" class="small">All compute occurs in the browser. SVD factors are computed in web workers and re-used for fast reconstruction.</text>
+  <text x="795" y="580" class="small">Assets are served statically by Next.js. UI uses Tailwind + Framer Motion for interaction polish.</text>
+
+</svg>
+
+
