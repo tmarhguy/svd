@@ -1,0 +1,81 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d946ef;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#grad1)"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="bold">SVD Image Compression Architecture</text>
+  
+  <!-- Frontend Box -->
+  <rect x="50" y="80" width="200" height="120" rx="10" fill="url(#grad2)" stroke="#ffffff" stroke-width="2"/>
+  <text x="150" y="105" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Frontend</text>
+  <text x="150" y="125" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">React + Next.js</text>
+  <text x="150" y="140" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">TypeScript</text>
+  <text x="150" y="155" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Tailwind CSS</text>
+  <text x="150" y="170" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Framer Motion</text>
+  
+  <!-- Backend Box -->
+  <rect x="550" y="80" width="200" height="120" rx="10" fill="url(#grad2)" stroke="#ffffff" stroke-width="2"/>
+  <text x="650" y="105" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Backend</text>
+  <text x="650" y="125" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">FastAPI</text>
+  <text x="650" y="140" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Python</text>
+  <text x="650" y="155" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">NumPy</text>
+  <text x="650" y="170" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Pillow</text>
+  
+  <!-- SVD Engine Box -->
+  <rect x="300" y="250" width="200" height="100" rx="10" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+  <text x="400" y="275" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="14" font-weight="bold">SVD Engine</text>
+  <text x="400" y="295" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Matrix Decomposition</text>
+  <text x="400" y="310" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Rank Reduction</text>
+  <text x="400" y="325" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Image Reconstruction</text>
+  
+  <!-- Performance Monitor -->
+  <rect x="50" y="400" width="150" height="80" rx="10" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+  <text x="125" y="425" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Performance</text>
+  <text x="125" y="440" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Monitor</text>
+  <text x="125" y="455" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Real-time Metrics</text>
+  
+  <!-- Error Handling -->
+  <rect x="600" y="400" width="150" height="80" rx="10" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+  <text x="675" y="425" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Error</text>
+  <text x="675" y="440" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Handling</text>
+  <text x="675" y="455" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Graceful Recovery</text>
+  
+  <!-- Arrows -->
+  <!-- Frontend to SVD -->
+  <line x1="250" y1="140" x2="300" y2="250" stroke="#ffffff" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <!-- Backend to SVD -->
+  <line x1="550" y1="140" x2="500" y2="250" stroke="#ffffff" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <!-- SVD to Performance -->
+  <line x1="300" y1="300" x2="200" y2="400" stroke="#ffffff" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <!-- SVD to Error -->
+  <line x1="500" y1="300" x2="600" y2="400" stroke="#ffffff" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ffffff"/>
+    </marker>
+  </defs>
+  
+  <!-- Data Flow Labels -->
+  <text x="275" y="200" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Image Upload</text>
+  <text x="525" y="200" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Processing</text>
+  <text x="250" y="350" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Metrics</text>
+  <text x="550" y="350" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Error Recovery</text>
+  
+  <!-- Legend -->
+  <rect x="50" y="520" width="700" height="60" rx="5" fill="rgba(255,255,255,0.1)" stroke="#ffffff" stroke-width="1"/>
+  <text x="400" y="540" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="12" font-weight="bold">System Components</text>
+  <text x="400" y="560" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="10">Frontend UI • Backend API • SVD Processing • Performance Monitoring • Error Handling</text>
+</svg>

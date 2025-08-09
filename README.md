@@ -11,13 +11,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 
 **Final Project for MATH 3120: Numerical Linear Algebra**  
 **University of Pennsylvania, School of Engineering and Applied Science**  
 **Fall 2024 - Computer Engineering**
 
-_An academic exploration of Singular Value Decomposition applied to image compression. This final project demonstrates the practical applications of numerical linear algebra concepts learned in MATH 3120, combining advanced mathematical theory with modern web technologies for interactive educational visualization._
+_A client-side web application demonstrating real-time SVD image compression. This final project showcases the practical applications of numerical linear algebra concepts learned in MATH 3120, combining advanced mathematical theory with modern web technologies for interactive educational visualization._
 
 </div>
 
@@ -33,19 +32,19 @@ _An academic exploration of Singular Value Decomposition applied to image compre
 - [Quick Start](#quick-start)
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-  - [Frontend Setup](#frontend-setup)
-  - [Backend Setup](#backend-setup)
+  - [Setup](#setup)
   - [Configuration](#configuration)
+- [Deployment](#deployment)
+  - [Deploy to Vercel](#deploy-to-vercel-recommended)
+  - [Other Deployment Options](#other-deployment-options)
 - [Usage](#usage)
   - [Web Interface](#web-interface)
   - [Compression Settings](#compression-settings)
   - [Performance Monitoring](#performance-monitoring)
 - [Architecture](#architecture)
 - [Mathematical Foundation](#mathematical-foundation)
-- [API Documentation](#api-documentation)
 - [Educational Content](#educational-content)
 - [Limitations](#limitations)
-- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Academic License and Usage](#academic-license-and-usage)
 - [Academic Acknowledgments](#academic-acknowledgments)
@@ -58,6 +57,7 @@ This project represents the culmination of learning in **MATH 3120: Numerical Li
 ### Course Context
 
 **MATH 3120: Numerical Linear Algebra** covers fundamental concepts in computational linear algebra, including:
+
 - Matrix decompositions (SVD, QR, LU)
 - Eigenvalue and eigenvector computations
 - Numerical stability and error analysis
@@ -68,6 +68,7 @@ This final project synthesizes these concepts into a comprehensive web applicati
 ### Academic Objectives
 
 The project serves multiple educational purposes:
+
 - **Practical Application**: Implementing SVD algorithms learned in class
 - **Real-world Relevance**: Demonstrating how linear algebra applies to image processing
 - **Technical Skills**: Combining mathematical theory with modern software development
@@ -76,7 +77,8 @@ The project serves multiple educational purposes:
 ### Project Scope
 
 This academic project goes beyond traditional coursework by:
-- Building a full-stack web application with mathematical computing backend
+
+- Building a client-side web application with browser-based mathematical computing
 - Implementing real-time SVD processing with performance monitoring
 - Creating educational content that explains the mathematical foundation
 - Providing interactive visualizations for better concept understanding
@@ -127,94 +129,93 @@ This academic project goes beyond traditional coursework by:
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)
 
-### Backend
+### Core Processing
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
-![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)
-![Pillow](https://img.shields.io/badge/Pillow-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Web Workers](https://img.shields.io/badge/Web_Workers-FF6B35?style=for-the-badge&logo=web&logoColor=white)
+![Canvas API](https://img.shields.io/badge/Canvas_API-FF4081?style=for-the-badge&logo=html5&logoColor=white)
 
 ### Mathematical Libraries
 
-![SciPy](https://img.shields.io/badge/SciPy-8CAAE6?style=for-the-badge&logo=scipy&logoColor=white)
+![Client-Side SVD](https://img.shields.io/badge/Client_Side_SVD-9C27B0?style=for-the-badge&logo=algorithm&logoColor=white)
 ![Linear Algebra](https://img.shields.io/badge/Linear_Algebra-FF6B6B?style=for-the-badge&logo=math&logoColor=white)
+![Browser Computing](https://img.shields.io/badge/Browser_Computing-4CAF50?style=for-the-badge&logo=javascript&logoColor=white)
+
+</div>
 
 ## Screenshots
 
+_For detailed information about each screenshot, see [screenshots/README.md](screenshots/README.md)_
+
 ### Main Interface
 
-_Professional web interface with interactive compression controls and real-time processing_
+_The main application interface showcasing the interactive SVD image compression tool with the welcome section, image upload area, and primary navigation. Features the professional sci-fi themed design with matrix rain effects and holographic styling that creates an engaging educational experience for MATH 3120 students._
 
 ![Main Interface](screenshots/main-interface.png)
 
-### Compression Settings
+### Matrix Visualization
 
-_Advanced parameter controls for fine-tuning compression quality and performance_
+_Interactive matrix representation showing how images are converted to numerical matrices for SVD processing. This educational visualization helps MATH 3120 students understand the fundamental concept of representing visual data as mathematical matrices, demonstrating the bridge between linear algebra theory and practical image processing._
 
-![Compression Settings](screenshots/compression-settings.png)
+![Matrix Visualization](screenshots/matrix.png)
 
-### Performance Monitoring
+### Performance Analytics
 
-_Real-time performance metrics and processing analytics dashboard_
+_Real-time performance monitoring dashboard displaying compression metrics, processing time, memory usage, and quality assessments. This interface provides students with insights into the computational complexity and efficiency of SVD algorithms, directly connecting to the numerical analysis concepts covered in MATH 3120._
 
-![Performance Monitor](screenshots/performance-monitor.png)
+![Performance Analytics](screenshots/compression-performance.png)
 
-### Educational Content
+### Interactive Quiz
 
-_Comprehensive mathematical foundation and SVD computation guides_
+_Educational quiz interface designed to test student understanding of SVD concepts and image compression principles. This interactive learning tool reinforces the mathematical concepts taught in MATH 3120 through engaging questions about singular value decomposition, matrix decomposition, and compression theory._
 
-![Educational Content](screenshots/educational-content.png)
-
-### Compression Comparison
-
-_Side-by-side analysis of original vs compressed images with quality metrics_
-
-![Compression Comparison](screenshots/compression-comparison.png)
+![Interactive Quiz](screenshots/quiz.png)
 
 ### System Architecture
 
-_Comprehensive architecture overview showing all system components_
+_Comprehensive system architecture diagram showing the client-side application structure, data flow, and component relationships. This technical overview demonstrates how mathematical algorithms are integrated into modern web applications, bridging academic theory with professional software development practices._
 
-![Architecture Diagram](screenshots/architecture-diagram.svg)
+![System Architecture](screenshots/architecture-diagram.svg)
+
+### Compression Comparison Visualization
+
+_Interactive SVG visualization comparing original and compressed images with detailed metrics and mathematical analysis. This dynamic diagram illustrates the effectiveness of different SVD rank approximations and provides visual feedback on compression quality, perfect for understanding the trade-offs in numerical linear algebra applications._
+
+![Compression Comparison](screenshots/compression-comparison.svg)
 
 ## Quick Start
 
-Get up and running in under 5 minutes:
+Get up and running in under 2 minutes:
 
 ```bash
 # Clone the repository
 git clone https://github.com/tmarhguy/svd.git
-cd svd
+cd compression-svd
 
-# Frontend setup
-cd apps/web
+# Install dependencies and start
 npm install
 npm run dev
 
-# Backend setup (in another terminal)
-cd apps/api
-pip install -r requirements.txt
-python main.py
+# Open your browser to http://localhost:3000
 ```
 
 ## Installation
 
 ### Prerequisites
 
-- **Node.js 16+** - [Download](https://nodejs.org/)
-- **Python 3.9+** - [Download](https://www.python.org/downloads/)
+- **Node.js 18+** - [Download](https://nodejs.org/)
 - **Modern Web Browser** - Chrome, Firefox, Safari, or Edge
 
-### Frontend Setup
+### Setup
 
 <details>
-<summary>Click to expand detailed frontend setup</summary>
+<summary>Click to expand detailed setup instructions</summary>
 
 1. **Clone and navigate to the project:**
 
    ```bash
    git clone https://github.com/tmarhguy/svd.git
-   cd svd/apps/web
+   cd compression-svd
    ```
 
 2. **Install dependencies:**
@@ -234,41 +235,6 @@ python main.py
 
 </details>
 
-### Backend Setup
-
-<details>
-<summary>Click to expand detailed backend setup</summary>
-
-1. **Navigate to backend directory:**
-
-   ```bash
-   cd apps/api
-   ```
-
-2. **Create virtual environment:**
-
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies:**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Start API server:**
-
-   ```bash
-   python main.py
-   ```
-
-5. **Verify installation:**
-   Navigate to `http://localhost:8000/docs`
-
-</details>
-
 ### Configuration
 
 The application uses default configurations optimized for most use cases. For advanced users:
@@ -277,38 +243,117 @@ The application uses default configurations optimized for most use cases. For ad
 
    ```bash
    # Frontend (.env.local)
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-
-   # Backend (.env)
-   MAX_FILE_SIZE=10485760  # 10MB
-   ALLOWED_EXTENSIONS=jpg,jpeg,png,bmp
+   NEXT_PUBLIC_MAX_FILE_SIZE=10485760  # 10MB
+   NEXT_PUBLIC_ALLOWED_EXTENSIONS=jpg,jpeg,png,bmp
    ```
 
 2. **Performance tuning**:
    ```bash
-   # Backend settings
-   WORKER_PROCESSES=4
-   CHUNK_SIZE=1024
+   # Client-side processing settings
+   NEXT_PUBLIC_WORKER_THREADS=4
+   NEXT_PUBLIC_CHUNK_SIZE=1024
    ```
+
+## Deployment
+
+### Deploy to Vercel (Recommended)
+
+This project is optimized for Vercel deployment with zero configuration:
+
+#### **One-Click Deploy**
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/tmarhguy/svd)
+
+#### **Manual Deployment**
+
+1. **Install Vercel CLI:**
+
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Deploy to production:**
+
+   ```bash
+   npm run deploy
+   ```
+
+3. **Deploy preview:**
+   ```bash
+   npm run deploy:preview
+   ```
+
+#### **GitHub Integration**
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Automatic deployments on every push to main branch
+4. Preview deployments for pull requests
+
+#### **Environment Variables (Optional)**
+
+For production customization, set these in your Vercel dashboard:
+
+```bash
+# Performance Settings
+NEXT_PUBLIC_MAX_FILE_SIZE=10485760
+NEXT_PUBLIC_MAX_IMAGE_DIMENSION=2048
+NEXT_PUBLIC_WORKER_THREADS=4
+
+# UI Configuration
+NEXT_PUBLIC_DEFAULT_QUALITY=85
+NEXT_PUBLIC_ENABLE_ANIMATIONS=true
+```
+
+#### **Custom Domain**
+
+After deployment, you can add a custom domain in your Vercel dashboard for a professional academic presentation.
+
+### Other Deployment Options
+
+<details>
+<summary>Alternative deployment platforms</summary>
+
+#### **Netlify**
+
+```bash
+npm run build
+# Upload .next folder to Netlify
+```
+
+#### **GitHub Pages**
+
+```bash
+npm run build
+npm run export
+# Deploy /out folder to GitHub Pages
+```
+
+#### **Self-Hosted**
+
+```bash
+npm run build
+npm run start
+# Runs on http://localhost:3000
+```
+
+</details>
 
 ## Usage
 
 ### Web Interface
 
 1. **Upload Image:**
-
    - Drag and drop an image file or click to browse
    - Supported formats: JPG, PNG, BMP
    - Maximum file size: 10MB
 
 2. **Adjust Compression Settings:**
-
    - **Rank Slider**: Control the number of singular values (1-100)
    - **Quality Slider**: Fine-tune compression quality (0-100)
    - **Color Mix**: Adjust color channel processing
 
 3. **Monitor Processing:**
-
    - Real-time progress indicators
    - Performance metrics display
    - Processing time tracking
@@ -368,28 +413,24 @@ The application uses default configurations optimized for most use cases. For ad
 
 ## Architecture
 
-<div align="center">
-
-![Architecture Diagram](screenshots/architecture-diagram.svg)
-
-</div>
+The application follows a modern client-side architecture with comprehensive browser-based processing:
 
 ### Core Components
 
 - **Frontend**: React-based SPA with TypeScript and Tailwind CSS
-- **Backend API**: FastAPI server with Python image processing
-- **SVD Engine**: NumPy-powered matrix decomposition
-- **Image Processing**: Pillow-based image manipulation
+- **SVD Engine**: Custom JavaScript implementation of matrix decomposition
+- **Web Workers**: Multi-threaded processing for performance
+- **Canvas API**: Image manipulation and pixel-level processing
 - **Performance Monitor**: Real-time metrics and analytics
 - **Error Handling**: Comprehensive error boundaries and recovery
 
 ### Data Flow
 
 1. **Image Upload**: Client-side file validation and preview
-2. **API Processing**: Server-side SVD decomposition
-3. **Real-time Updates**: WebSocket-like progress tracking
-4. **Result Delivery**: Compressed image and metadata
-5. **Performance Analytics**: Metrics collection and display
+2. **Browser Processing**: Local SVD decomposition using Web Workers
+3. **Real-time Updates**: Progress tracking and live preview
+4. **Result Display**: Compressed image and quality metrics
+5. **Performance Analytics**: Metrics collection and visualization
 
 ## Mathematical Foundation
 
@@ -426,56 +467,6 @@ Compression Ratio = (Original Size - Compressed Size) / Original Size × 100%
 - **Peak Signal-to-Noise Ratio (PSNR)**
 - **Structural Similarity Index (SSIM)**
 - **Mean Squared Error (MSE)**
-
-## API Documentation
-
-The backend provides comprehensive REST API documentation:
-
-- **Interactive Docs**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
-
-### Key Endpoints
-
-| Endpoint               | Method | Description                  |
-| ---------------------- | ------ | ---------------------------- |
-| `/upload`              | POST   | Upload image for compression |
-| `/compress`            | POST   | Perform SVD compression      |
-| `/status/{session_id}` | GET    | Check processing status      |
-| `/download/{file_id}`  | GET    | Download compressed image    |
-| `/metrics`             | GET    | Get performance metrics      |
-
-### Request/Response Examples
-
-<details>
-<summary>Click to expand API examples</summary>
-
-**Upload Image:**
-
-```bash
-curl -X POST "http://localhost:8000/upload" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@image.jpg"
-```
-
-**Compress Image:**
-
-```bash
-curl -X POST "http://localhost:8000/compress" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "file_id": "abc123",
-    "rank": 25,
-    "quality": 85
-  }'
-```
-
-**Get Status:**
-
-```bash
-curl -X GET "http://localhost:8000/status/abc123"
-```
-
-</details>
 
 ## Educational Content
 
@@ -518,38 +509,7 @@ curl -X GET "http://localhost:8000/status/abc123"
 - **Very Large Images**: May cause browser memory issues
 - **Complex Textures**: Some textures may not compress well
 - **Color Accuracy**: Slight color shifts possible with high compression
-- **Processing Limits**: Server-side rate limiting for stability
-
-## Roadmap
-
-### Upcoming Features
-
-- [ ] **Batch Processing**: Multiple image compression
-- [ ] **Advanced Formats**: Support for TIFF, WebP, AVIF
-- [ ] **Cloud Storage**: Integration with cloud services
-- [ ] **Mobile App**: Native iOS/Android applications
-- [ ] **AI Enhancement**: Machine learning for parameter optimization
-- [ ] **Video Compression**: Extend to video processing
-- [ ] **Real-time Streaming**: Live compression for video calls
-
-### Technical Improvements
-
-- [ ] **WebAssembly**: Faster client-side processing
-- [ ] **GPU Acceleration**: CUDA/OpenCL support
-- [ ] **Progressive Loading**: Better large file handling
-- [ ] **Caching System**: Improved performance for repeated operations
-- [ ] **Advanced Analytics**: Detailed compression statistics
-- [ ] **Export Options**: Multiple output format support
-
-### Educational Enhancements
-
-- [ ] **Interactive Tutorials**: Step-by-step learning modules aligned with MATH 3120 curriculum
-- [ ] **Mathematical Visualizations**: Enhanced SVD demonstrations for educational purposes
-- [ ] **Comparison Tools**: Advanced before/after analysis for academic study
-- [ ] **Performance Benchmarks**: Computational complexity analysis for course assignments
-- [ ] **Research Integration**: Academic paper references and course material connections
-- [ ] **Assignment Extensions**: Additional problem sets based on the implementation
-- [ ] **Lecture Integration**: Materials suitable for classroom demonstration
+- **Processing Limits**: Client-side processing limitations
 
 ## Contributing
 
@@ -578,30 +538,28 @@ We welcome contributions! Here's how to get started:
 # Clone your fork
 git clone https://github.com/yourusername/svd.git
 
-# Install dependencies
-cd apps/web && npm install
-cd ../api && pip install -r requirements.txt
+# Install dependencies and start
+cd compression-svd && npm install
 
-# Run development servers
-cd ../web && npm run dev
-cd ../api && python main.py
+# Run development server
+npm run dev
 ```
 
 ### Code Standards
 
 - **TypeScript**: Strict mode, comprehensive typing
-- **Python**: PEP 8, type hints, docstrings
+- **JavaScript**: ES6+, modern syntax, proper error handling
 - **Testing**: Maintain >80% code coverage
 - **Documentation**: Update README for new features
-- **Performance**: Optimize for large image processing
+- **Performance**: Optimize for large image processing in browser
 
 ### Areas for Contribution
 
 - **Frontend**: React components, UI/UX improvements
-- **Backend**: API endpoints, image processing algorithms
+- **Algorithms**: SVD optimization, mathematical accuracy
 - **Documentation**: Tutorials, mathematical explanations
 - **Testing**: Unit tests, integration tests
-- **Performance**: Optimization, caching strategies
+- **Performance**: Web Workers, memory optimization
 
 </details>
 
@@ -626,16 +584,14 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - ✅ Modification allowed for learning purposes
 - ✅ Distribution allowed with attribution
 - ✅ Private use allowed
-- ❌ Liability and warranty not provided
-- ⚠️ **Academic Use**: Please provide appropriate citation if used for educational purposes
 
 ### Citation
 
 If you use this project for academic purposes, please cite as:
 
 ```
-Marhguy, T. (2024). SVD Image Compression: A Numerical Linear Algebra Approach. 
-Final Project for MATH 3120: Numerical Linear Algebra. 
+Marhguy, T. (2024). SVD Image Compression: A Numerical Linear Algebra Approach.
+Final Project for MATH 3120: Numerical Linear Algebra.
 University of Pennsylvania, School of Engineering and Applied Science.
 https://github.com/tmarhguy/svd
 ```
@@ -651,16 +607,15 @@ https://github.com/tmarhguy/svd
 
 ### Academic Contributors
 
-- **Course Instructor** - Guidance on numerical linear algebra concepts and SVD theory
+- **Course Instructor: Maxine Calle (she/her)** - [callem@sas.upenn.edu](mailto:callem@sas.upenn.edu) | [Faculty Profile](https://web.sas.upenn.edu/callem/) - Guidance on numerical linear algebra concepts and SVD theory
 - **Teaching Assistants** - Support with mathematical implementations and debugging
 - **Classmates and Study Groups** - Collaborative learning and concept discussions
 - **Academic Advisors** - Project guidance and educational goal alignment
 
 ### Technical Acknowledgments
 
-- **NumPy/SciPy**: Fundamental numerical computing libraries used in course
-- **React/Next.js**: Modern web development frameworks for educational visualization
-- **FastAPI**: High-performance backend for mathematical computations
+- **Next.js/React**: Modern web development frameworks for educational visualization
+- **TypeScript**: Type-safe development for mathematical applications
 - **Tailwind CSS**: Professional UI framework for academic presentation
 - **University Computing Resources**: Development and testing infrastructure
 
