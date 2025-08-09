@@ -5,7 +5,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import { createCanvas, loadImage } from 'canvas';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -108,6 +107,15 @@ async function preprocessSampleImage() {
   // Skip in CI/Vercel to avoid native canvas dependency issues during cloud builds
   if (process.env.VERCEL || process.env.CI) {
     console.log('⏭️  Skipping preprocessing in CI/VERCEL environment');
+    return null;
+  }
+
+  // Lazily load canvas; allow running without it
+  let createCanvas, loadImage;
+  try {
+    ({ createCanvas, loadImage } = await import('canvas'));
+  } catch (e) {
+    console.log('Skipping preprocessing: optional dependency "canvas" not installed.');
     return null;
   }
   

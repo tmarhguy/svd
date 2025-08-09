@@ -18,6 +18,8 @@
 
 _A client-side web application demonstrating real-time SVD image compression. This final project showcases the practical applications of numerical linear algebra concepts learned in MATH 3120, combining advanced mathematical theory with modern web technologies for interactive educational visualization._
 
+**Live Demo:** https://svd-wheat.vercel.app/
+
 </div>
 
 ## Table of Contents
