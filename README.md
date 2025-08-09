@@ -176,6 +176,7 @@ _Educational quiz interface designed to test student understanding of SVD concep
 
 Comprehensive system architecture showing client-side structure, data flow, and component relationships.
 
+<!-- If your Markdown preview doesn't support Mermaid, open docs/architecture.mmd in a Mermaid-enabled viewer -->
 ```mermaid
 graph TD
   subgraph "Browser (Client)"
@@ -207,6 +208,8 @@ graph TD
   style UI stroke-dasharray: 3 3
   style WW stroke-dasharray: 3 3
 ```
+
+Mermaid source: `docs/architecture.mmd`
 
 ### Compression Comparison Visualization
 
