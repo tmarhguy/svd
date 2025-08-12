@@ -4,7 +4,7 @@ import { useState, useEffect, lazy, Suspense, useCallback, useMemo, memo, useRef
 import dynamic from "next/dynamic";
 import NextImage from "next/image";
 import { Gauge } from "../components/icons";
-import { CompressionResult, CompressionOptions, reconstructFromPrecomputed, startStatefulCompression, StatefulCompressionSession } from "../utils/svdCompression";
+import { CompressionResult, CompressionOptions, precomputeSVD, reconstructFromPrecomputed, startStatefulCompression, StatefulCompressionSession } from "../utils/svdCompression";
 import { useSampleData } from "../hooks/useSampleData";
 
 import DropZone from "../components/DropZone";
@@ -33,12 +33,14 @@ const AboutAuthor = lazy(() => import("../components/AboutAuthor"));
 const ControlPanel = memo(({ 
   compressionOptions, 
   onOptionsChange,
+  processingProgress,
   loading,
   compressionResult,
   maxRank
 }: {
   compressionOptions: CompressionOptions;
   onOptionsChange: (options: CompressionOptions) => void;
+  processingProgress: number;
   loading: boolean;
   compressionResult: CompressionResult | null;
   maxRank: number;
@@ -63,7 +65,7 @@ const ControlPanel = memo(({
   const pivotFrac = 0.7; // 70% of track dedicated to low ranks
   const sliderMax = 1000; // high-resolution track for smooth mapping
 
-  const rankToSlider = useCallback((rank: number): number => {
+  const rankToSlider = (rank: number): number => {
     const r = Math.max(1, Math.min(maxRank, Math.floor(rank)));
     if (maxRank <= 1) return 0;
     if (maxRank <= pivotRank) {
@@ -73,7 +75,7 @@ const ControlPanel = memo(({
       return Math.round(((r - 1) / (pivotRank - 1)) * pivotFrac * sliderMax);
     }
     return Math.round((pivotFrac + ((r - pivotRank) / (maxRank - pivotRank)) * (1 - pivotFrac)) * sliderMax);
-  }, [maxRank, pivotRank, pivotFrac]);
+  };
 
   const sliderToRank = (pos: number): number => {
     const p = Math.max(0, Math.min(1, pos / sliderMax));
@@ -167,7 +169,7 @@ const ControlPanel = memo(({
     // Ensure last label (maxRank) is included even if spacing is tight
     if (!out.includes(maxRank)) out.push(maxRank);
     return out;
-  }, [tickRanks, maxRank, rankToSlider]);
+  }, [tickRanks, maxRank]);
 
   return (
     <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
@@ -485,7 +487,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [compressedUrl]);
+  }, []);
 
   // Revoke old blob URLs to avoid memory leaks
   useEffect(() => {
@@ -594,8 +596,8 @@ export default function Home() {
       const colorMix = newOptions.colorMix ?? 1;
       if (sessionRef.current) {
         sessionRef.current.setRank(rank);
-        // expose setColorMix via session if available
-        (sessionRef.current as unknown as { setColorMix?: (mix: number) => void }).setColorMix?.(colorMix);
+        // @ts-ignore expose setColorMix via session
+        (sessionRef.current as any).setColorMix?.(colorMix);
         return;
       }
       // Fallback to legacy path
@@ -725,7 +727,38 @@ export default function Home() {
             {/* Compression Interface */}
             {file && (
               <div className="space-y-6 sm:space-y-8">
-                {/* Image Comparison (full-width, first) */}
+                {/* Top horizontal bar: Controls + Performance */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
+                  <ControlPanel
+                    compressionOptions={compressionOptions}
+                    onOptionsChange={handleOptionsChange}
+                    loading={effectiveLoading}
+                    compressionResult={compressionResult}
+                    maxRank={dynamicMaxRank}
+                  />
+                  {isClient && (
+                    <PerformanceMonitor
+                      isProcessing={effectiveLoading}
+                      metrics={compressionResult && compressionResult.metadata ? (() => {
+                        const actualCompression = Number.isFinite(compressionResult.compressionRatio)
+                          ? compressionResult.compressionRatio
+                          : 0;
+                        return {
+                          processingTime: Math.max(1, compressionResult.processingTime),
+                          memoryUsage: compressionResult.compressedSize,
+                          cpuUsage: 0,
+                          compressionRatio: Math.max(0, Math.min(100, actualCompression)),
+                          qualityScore: compressionResult.quality,
+                          originalSize: compressionResult.originalSize,
+                          compressedSize: compressionResult.compressedSize,
+                        };
+                      })() : null}
+                      colorMix={compressionOptions.colorMix ?? 1}
+                    />
+                  )}
+                </div>
+
+                {/* Image Comparison (now larger, full-width) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-stretch">
                   {/* Original Image */}
                   <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
@@ -761,37 +794,6 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-
-                {/* Bottom horizontal bar: Controls + Performance */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
-                  <ControlPanel
-                    compressionOptions={compressionOptions}
-                    onOptionsChange={handleOptionsChange}
-                    loading={effectiveLoading}
-                    compressionResult={compressionResult}
-                    maxRank={dynamicMaxRank}
-                  />
-                  {isClient && (
-                    <PerformanceMonitor
-                      isProcessing={effectiveLoading}
-                      metrics={compressionResult && compressionResult.metadata ? (() => {
-                        const actualCompression = Number.isFinite(compressionResult.compressionRatio)
-                          ? compressionResult.compressionRatio
-                          : 0;
-                        return {
-                          processingTime: Math.max(1, compressionResult.processingTime),
-                          memoryUsage: compressionResult.compressedSize,
-                          cpuUsage: 0,
-                          compressionRatio: Math.max(0, Math.min(100, actualCompression)),
-                          qualityScore: compressionResult.quality,
-                          originalSize: compressionResult.originalSize,
-                          compressedSize: compressionResult.compressedSize,
-                        };
-                      })() : null}
-                      colorMix={compressionOptions.colorMix ?? 1}
-                    />
-                  )}
-                </div>
               </div>
             )}
 
@@ -802,6 +804,7 @@ export default function Home() {
                   file={file}
                   compressionResult={compressionResult}
                   singularValues={singularValues}
+                  displayAspect={originalAspect}
                 />
               </div>
             )}
