@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, lazy, Suspense, useCallback, useMemo, memo, useRef } from "react";
+import type { KeyboardEvent } from "react";
 import dynamic from "next/dynamic";
 import NextImage from "next/image";
 import { Gauge } from "../components/icons";
-import { CompressionResult, CompressionOptions, precomputeSVD, reconstructFromPrecomputed, startStatefulCompression, StatefulCompressionSession } from "../utils/svdCompression";
+import { CompressionResult, CompressionOptions, reconstructFromPrecomputed, startStatefulCompression, StatefulCompressionSession } from "../utils/svdCompression";
 import { useSampleData } from "../hooks/useSampleData";
 
 import DropZone from "../components/DropZone";
@@ -33,14 +34,12 @@ const AboutAuthor = lazy(() => import("../components/AboutAuthor"));
 const ControlPanel = memo(({ 
   compressionOptions, 
   onOptionsChange,
-  processingProgress,
   loading,
   compressionResult,
   maxRank
 }: {
   compressionOptions: CompressionOptions;
   onOptionsChange: (options: CompressionOptions) => void;
-  processingProgress: number;
   loading: boolean;
   compressionResult: CompressionResult | null;
   maxRank: number;
@@ -65,19 +64,19 @@ const ControlPanel = memo(({
   const pivotFrac = 0.7; // 70% of track dedicated to low ranks
   const sliderMax = 1000; // high-resolution track for smooth mapping
 
-  const rankToSlider = (rank: number): number => {
+  const rankToSlider = useCallback((rank: number): number => {
     const r = Math.max(1, Math.min(maxRank, Math.floor(rank)));
     if (maxRank <= 1) return 0;
     if (maxRank <= pivotRank) {
       return Math.round(((r - 1) / (maxRank - 1)) * sliderMax);
     }
     if (r <= pivotRank) {
-      return Math.round(((r - 1) / (pivotRank - 1)) * pivotFrac * sliderMax);
+      return Math.round(((r - 1) / (pivotRank - 1)) * (pivotFrac * sliderMax));
     }
     return Math.round((pivotFrac + ((r - pivotRank) / (maxRank - pivotRank)) * (1 - pivotFrac)) * sliderMax);
-  };
+  }, [maxRank, pivotRank]);
 
-  const sliderToRank = (pos: number): number => {
+  const sliderToRank = useCallback((pos: number): number => {
     const p = Math.max(0, Math.min(1, pos / sliderMax));
     if (maxRank <= 1) return 1;
     if (maxRank <= pivotRank) {
@@ -89,7 +88,7 @@ const ControlPanel = memo(({
     }
     const local = (p - pivotFrac) / (1 - pivotFrac);
     return Math.max(pivotRank, Math.min(maxRank, Math.round(pivotRank + local * (maxRank - pivotRank))));
-  };
+  }, [maxRank, pivotRank]);
 
   const sliderValue = rankToSlider(compressionOptions.rank || 1);
   const rangeRef = useRef<HTMLInputElement | null>(null);
@@ -107,7 +106,7 @@ const ControlPanel = memo(({
 
   // Accessible keyboard controls mapped in rank units (not raw slider units)
   const onSliderKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
+    (e: KeyboardEvent<HTMLInputElement>) => {
       const rankNow = compressionOptions.rank || 1;
       let nextRank: number | null = null;
       const stepSmall = 1;
@@ -169,7 +168,7 @@ const ControlPanel = memo(({
     // Ensure last label (maxRank) is included even if spacing is tight
     if (!out.includes(maxRank)) out.push(maxRank);
     return out;
-  }, [tickRanks, maxRank]);
+  }, [tickRanks, maxRank, rankToSlider]);
 
   return (
     <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
@@ -479,8 +478,6 @@ export default function Home() {
         }
       }, options.colorMix ?? 1);
       // progress ring removed
-      // Also set a summary CompressionResult-like object for metrics panel using current image
-      setCompressionResult((prev) => prev ? { ...prev, compressedImage: compressedUrl, rank: options.rank || 30 } : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Compression failed");
       console.error("Compression error:", err);
@@ -596,8 +593,7 @@ export default function Home() {
       const colorMix = newOptions.colorMix ?? 1;
       if (sessionRef.current) {
         sessionRef.current.setRank(rank);
-        // @ts-ignore expose setColorMix via session
-        (sessionRef.current as any).setColorMix?.(colorMix);
+        sessionRef.current.setColorMix?.(colorMix);
         return;
       }
       // Fallback to legacy path
@@ -726,75 +722,81 @@ export default function Home() {
 
             {/* Compression Interface */}
             {file && (
-              <div className="space-y-6 sm:space-y-8">
-                {/* Top horizontal bar: Controls + Performance */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+                {/* Controls */}
+                <div className="lg:col-span-1">
                   <ControlPanel
                     compressionOptions={compressionOptions}
                     onOptionsChange={handleOptionsChange}
                     loading={effectiveLoading}
-                    compressionResult={compressionResult}
-                    maxRank={dynamicMaxRank}
-                  />
+                compressionResult={compressionResult}
+                maxRank={dynamicMaxRank}
+              />
+            </div>
+              
+                {/* Image Comparison */}
+                <div className="lg:col-span-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-stretch">
+                    {/* Original Image */}
+              <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
+                      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">Original</h3>
+                      <div className="relative rounded-lg overflow-hidden bg-black/50" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
+                        {isClient && originalUrl && (
+                          <NextImage 
+                            src={originalUrl} 
+                            alt="Original"
+                            fill
+                            className="object-contain"
+                            unoptimized
+                          />
+                        )}
+                      </div>
+                </div>
+ 
+                     {/* Compressed Image */}
+                <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
+                      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">
+                        Compressed (k={compressionOptions.rank})
+                  </h3>
+                      <div className="relative rounded-lg overflow-hidden bg-black/50" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
+                        {compressedUrl && (
+                          <NextImage 
+                            src={compressedUrl} 
+                            alt="Compressed" 
+                            fill
+                            className="object-contain"
+                            unoptimized
+                          />
+                        )}
+                      </div>
+                     </div>
+             </div>
+
+              {/* Performance Monitor */}
                   {isClient && (
-                    <PerformanceMonitor
-                      isProcessing={effectiveLoading}
-                      metrics={compressionResult && compressionResult.metadata ? (() => {
-                        const actualCompression = Number.isFinite(compressionResult.compressionRatio)
-                          ? compressionResult.compressionRatio
-                          : 0;
-                        return {
-                          processingTime: Math.max(1, compressionResult.processingTime),
-                          memoryUsage: compressionResult.compressedSize,
-                          cpuUsage: 0,
-                          compressionRatio: Math.max(0, Math.min(100, actualCompression)),
-                          qualityScore: compressionResult.quality,
-                          originalSize: compressionResult.originalSize,
-                          compressedSize: compressionResult.compressedSize,
-                        };
-                      })() : null}
-                      colorMix={compressionOptions.colorMix ?? 1}
-                    />
+                    <div className="mt-4 sm:mt-6">
+                  <PerformanceMonitor 
+                isProcessing={effectiveLoading}
+                metrics={compressionResult && compressionResult.metadata ? (() => {
+                  const actualCompression = Number.isFinite(compressionResult.compressionRatio)
+                    ? compressionResult.compressionRatio
+                    : 0;
+                  return {
+                    processingTime: Math.max(1, compressionResult.processingTime),
+                    memoryUsage: compressionResult.compressedSize,
+                    cpuUsage: 0,
+                    compressionRatio: Math.max(0, Math.min(100, actualCompression)),
+                    qualityScore: compressionResult.quality,
+                    originalSize: compressionResult.originalSize,
+                    compressedSize: compressionResult.compressedSize,
+                  };
+                })() : null}
+                colorMix={compressionOptions.colorMix ?? 1}
+              />
+                    </div>
                   )}
                 </div>
-
-                {/* Image Comparison (now larger, full-width) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-stretch">
-                  {/* Original Image */}
-                  <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
-                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">Original</h3>
-                    <div className="relative rounded-lg overflow-hidden bg-black/50" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
-                      {isClient && originalUrl && (
-                        <NextImage
-                          src={originalUrl}
-                          alt="Original"
-                          fill
-                          className="object-contain"
-                          unoptimized
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Compressed Image */}
-                  <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
-                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">
-                      Compressed (k={compressionOptions.rank})
-                    </h3>
-                    <div className="relative rounded-lg overflow-hidden bg-black/50" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
-                      {compressedUrl && (
-                        <NextImage
-                          src={compressedUrl}
-                          alt="Compressed"
-                          fill
-                          className="object-contain"
-                          unoptimized
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+            </div>
             )}
 
             {/* Matrix Representation */}
@@ -804,7 +806,6 @@ export default function Home() {
                   file={file}
                   compressionResult={compressionResult}
                   singularValues={singularValues}
-                  displayAspect={originalAspect}
                 />
               </div>
             )}

@@ -57,6 +57,7 @@ export interface CompressionOptions {
 // Stateful session handle (approx-first, incremental updates). Optional alternative to precompute+reconstruct API.
 export interface StatefulCompressionSession {
   setRank: (rank: number) => void;
+  setColorMix?: (mix: number) => void;
   dispose: () => void;
   metadata: ImageMetadata;
 }
@@ -93,8 +94,7 @@ export async function startStatefulCompression(
   return {
     setRank: (rank: number) => session.setRank(rank),
     // Expose color mix control into session
-    // @ts-ignore - Caller may not use it
-    setColorMix: (mix: number) => (session as any).setColorMix?.(mix),
+    setColorMix: (mix: number) => session.setColorMix(mix),
     dispose: () => session.dispose(),
     metadata,
   };
