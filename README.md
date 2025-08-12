@@ -193,13 +193,19 @@ Get up and running in under 2 minutes:
 ```bash
 # Clone the repository
 git clone https://github.com/tmarhguy/svd.git
-cd compression-svd
+cd svd
 
 # Install dependencies and start
 npm install
 npm run dev
 
 # Open your browser to http://localhost:3000
+```
+
+Note: if your clone contains this app within a subfolder (e.g., `svd/compression-svd`), run `cd svd/compression-svd` instead of `cd svd`.
+
+```bash
+
 ```
 
 ## Installation
@@ -400,6 +406,7 @@ npm run start
 - Affects both file size and visual quality
 - Works in conjunction with rank parameter
 - Real-time preview of changes
+- Interaction with rank: Rank is the primary control for retained detail; Quality provides subtle weighting/clamping in reconstruction so you can fine-tune appearance at a fixed rank.
 
 **Color Mix:**
 
@@ -579,6 +586,11 @@ Where:
 Compression Ratio = (Original Size - Compressed Size) / Original Size × 100%
 ```
 
+Notes on metrics used in the app:
+
+- Size saved (%) = (Original − Compressed) / Original × 100% (what the UI labels as "Compression" percent reduction)
+- Compression ratio (×) = Original / Compressed (e.g., 6.4×). Both can be reported; labels clarify the difference.
+
 ### Quality Metrics
 
 - **Peak Signal-to-Noise Ratio (PSNR)**
@@ -615,7 +627,7 @@ Compression Ratio = (Original Size - Compressed Size) / Original Size × 100%
 
 ### Current Constraints
 
-- **File Size**: Maximum 10MB per image
+- **File Size**: Maximum 20MB per image (configurable via `NEXT_PUBLIC_FILE_SIZE_LIMIT`)
 - **Format Support**: JPG, PNG, BMP formats only
 - **Processing Time**: Large images may take several seconds
 - **Browser Compatibility**: Modern browsers required
