@@ -21,9 +21,9 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   minimumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -34,8 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
-        <link rel="preload" href="/ghanaimage-svd-data.json" as="fetch" crossOrigin="anonymous" />
+        {/* Next will inject the viewport meta from the exported viewport object */}
       </head>
       <body className={`${inter.className} space-bg cyber-grid-bg`}>
         {/* Matrix Rain Effect */}
