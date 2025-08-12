@@ -25,7 +25,7 @@ export default function DropZone({ onFile, isActive = false }: DropZoneProps) {
   return (
     <div
       {...getRootProps()}
-      className={`cyber-dropzone p-8 rounded-xl text-center cursor-pointer transition-all duration-300 ${
+      className={`cyber-dropzone p-6 sm:p-8 rounded-xl text-center cursor-pointer transition-all duration-300 ${
         isDragActive || isActive ? 'cyber-dropzone-active' : ''
       }`}
     >
@@ -35,19 +35,19 @@ export default function DropZone({ onFile, isActive = false }: DropZoneProps) {
         transition={{ duration: 0.3 }}
       >
         <input {...getInputProps()} />
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex justify-center">
-            <div className="p-4 bg-gradient-to-r from-neon-500 to-plasma-500 rounded-xl">
-              <Upload className="w-8 h-8 text-white" />
+            <div className="p-3 sm:p-4 bg-gradient-to-r from-neon-500 to-plasma-500 rounded-xl">
+              <Upload className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
           </div>
-          <div className="space-y-2">
-            <p className="text-lg font-medium neon-text">
+          <div className="space-y-1 sm:space-y-2">
+            <p className="text-base sm:text-lg font-medium neon-text">
               {isDragActive ? "Drop your image here" : "Drag & drop an image"}
             </p>
-            <p className="text-sm text-gray-400">or click to browse</p>
+            <p className="text-xs sm:text-sm text-gray-400">or tap to browse</p>
           </div>
-          <p className="text-xs text-gray-500">Supports: JPEG, PNG, GIF, BMP</p>
+          <p className="text-[11px] sm:text-xs text-gray-500">Supports: JPEG, PNG, GIF, BMP</p>
         </div>
       </motion.div>
     </div>

@@ -93,10 +93,10 @@ export default function SVDVisualization({
       </div>
 
       {/* Animated Matrix Visualization */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div className="bg-gradient-to-br from-space-900 to-space-800 p-6 rounded-xl border border-space-700">
-          <h3 className="text-xl font-bold text-center mb-6 neon-text">Matrix Visualization</h3>
-          <div className="relative w-full h-64">
+          <h3 className="text-lg sm:text-xl font-bold text-center mb-4 sm:mb-6 neon-text">Matrix Visualization</h3>
+          <div className="relative w-full h-56 sm:h-64">
             <div className="w-full h-full bg-gradient-to-br from-space-800 to-space-700 rounded-lg flex items-center justify-center">
               <div className="text-center text-gray-400">
                 <div className="text-2xl mb-2">📊</div>
@@ -108,8 +108,8 @@ export default function SVDVisualization({
         </div>
 
         <div className="bg-gradient-to-br from-space-900 to-space-800 p-6 rounded-xl border border-space-700">
-          <h3 className="text-xl font-bold text-center mb-6 neon-text">Mathematical Formulas</h3>
-          <div className="relative w-full h-64">
+          <h3 className="text-lg sm:text-xl font-bold text-center mb-4 sm:mb-6 neon-text">Mathematical Formulas</h3>
+          <div className="relative w-full h-56 sm:h-64">
             <div className="w-full h-full bg-gradient-to-br from-space-800 to-space-700 rounded-lg flex items-center justify-center">
               <div className="text-center text-gray-400">
                 <div className="text-2xl mb-2">📐</div>
@@ -121,7 +121,7 @@ export default function SVDVisualization({
         </div>
       </div>
 
-      <div className="flex items-center space-x-3 mb-6">
+      <div className="flex items-center space-x-3 mb-4 sm:mb-6">
         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent"></div>
         <div className="px-4 py-2 bg-space-800 rounded-lg border border-space-600">
           <span className="text-sm text-gray-400">SVD Decomposition Process</span>
@@ -130,7 +130,7 @@ export default function SVDVisualization({
       </div>
 
       {/* Step-by-step explanation */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {steps.map((step, index) => (
           <motion.div
             key={index}
@@ -138,23 +138,23 @@ export default function SVDVisualization({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 hover:border-current transition-colors duration-200"
+            className="bg-gradient-to-br from-space-800 to-space-700 p-5 sm:p-6 rounded-xl border border-space-600 hover:border-current transition-colors duration-200"
             style={{ borderColor: getStepColor(step.color) + '40' }}
           >
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
               <div className={`p-3 bg-gradient-to-r from-${getStepColor(step.color)} to-${getStepColor(step.color)}/80 rounded-xl`}>
-                <step.icon className="w-6 h-6 text-white" />
+                <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <h4 className="text-lg font-semibold neon-text">{step.title}</h4>
+              <h4 className="text-base sm:text-lg font-semibold neon-text">{step.title}</h4>
             </div>
             
-            <p className="text-gray-300 text-sm mb-4 leading-relaxed">
+            <p className="text-gray-300 text-sm mb-3 sm:mb-4 leading-relaxed">
               {step.description}
             </p>
             
             <div className="bg-space-700 p-3 rounded-lg">
               <code 
-                className="text-sm font-mono text-neon-400"
+                className="text-xs sm:text-sm font-mono text-neon-400"
                 dangerouslySetInnerHTML={{ __html: step.formula }}
               />
             </div>
@@ -168,14 +168,14 @@ export default function SVDVisualization({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600"
+        className="bg-gradient-to-br from-space-800 to-space-700 p-5 sm:p-6 rounded-xl border border-space-600"
       >
-        <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
-          <Square className="w-5 h-5" />
+        <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center space-x-2">
+          <Square className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Mathematical Context</span>
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-3">
             <div className="p-3 bg-space-700 rounded-lg">
               <span className="text-neon-400 font-semibold">U:</span> Left singular vectors (orthogonal matrix)

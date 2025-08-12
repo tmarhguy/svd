@@ -1,5 +1,6 @@
 // Robust client-side SVD compression utilities with advanced features
 import { runChannelSVDs, runChannelReconstruct } from './workerCoordinator';
+import { createStatefulSvdSession, SessionUpdate } from './statefulSession';
 
 export interface CompressionResult {
   compressedImage: string; // base64 data URL
@@ -51,6 +52,52 @@ export interface CompressionOptions {
   maxIterations?: number;
   // Engine to use for reconstruction: truncated = classic U_k Σ_k V_k^T; weighted = prior quality-weighted variant
   engine?: 'truncated' | 'weighted';
+}
+
+// Stateful session handle (approx-first, incremental updates). Optional alternative to precompute+reconstruct API.
+export interface StatefulCompressionSession {
+  setRank: (rank: number) => void;
+  dispose: () => void;
+  metadata: ImageMetadata;
+}
+
+// Create a stateful compression session that streams approximate results first, then exact
+export async function startStatefulCompression(
+  imageFile: File,
+  initialRank: number,
+  onUpdate: (result: { imageUrl: string; width: number; height: number; isApproximation: boolean; singularValues: { red: number[]; green: number[]; blue: number[] } }) => void,
+  initialColorMix: number = 1,
+): Promise<StatefulCompressionSession> {
+  const processor = new ImageProcessor();
+  const { imageData, metadata } = await processor.loadAndNormalize(imageFile, { maxPixels: pickComputePixelBudget(), extremeAspectThreshold: 2.5 });
+  const session = await createStatefulSvdSession(imageData, initialRank, (update: SessionUpdate) => {
+    // Convert ImageData to data URL for UI
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    canvas.width = update.imageData.width;
+    canvas.height = update.imageData.height;
+    ctx.putImageData(update.imageData, 0, 0);
+    const imageUrl = canvas.toDataURL('image/jpeg', 0.9);
+    onUpdate({
+      imageUrl,
+      width: update.imageData.width,
+      height: update.imageData.height,
+      isApproximation: update.isApproximation,
+      singularValues: {
+        red: Array.from(update.singularValues.red),
+        green: Array.from(update.singularValues.green),
+        blue: Array.from(update.singularValues.blue),
+      },
+    });
+  }, initialColorMix);
+  return {
+    setRank: (rank: number) => session.setRank(rank),
+    // Expose color mix control into session
+    // @ts-ignore - Caller may not use it
+    setColorMix: (mix: number) => (session as any).setColorMix?.(mix),
+    dispose: () => session.dispose(),
+    metadata,
+  };
 }
 
 // ----- Config & Adaptive Limits -----

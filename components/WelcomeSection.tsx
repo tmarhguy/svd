@@ -5,7 +5,7 @@ import { Rocket, Brain, Zap, Target } from "lucide-react";
 
 export default function WelcomeSection() {
   return (
-    <section id="welcome" className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <section id="welcome" className="min-h-[80vh] sm:min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Simplified Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-space-900 via-space-800 to-space-900"></div>
       <div className="absolute inset-0 bg-cyber-grid opacity-10"></div>
@@ -20,7 +20,7 @@ export default function WelcomeSection() {
           {/* Main Title */}
           <div className="space-y-6">
             <motion.h1 
-              className="text-6xl md:text-8xl font-bold neon-text"
+              className="text-5xl md:text-8xl font-bold neon-text"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -28,7 +28,7 @@ export default function WelcomeSection() {
               SVD
             </motion.h1>
             <motion.h2 
-              className="text-2xl md:text-4xl font-semibold hologram-text"
+              className="text-xl md:text-4xl font-semibold hologram-text"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -36,7 +36,7 @@ export default function WelcomeSection() {
               Quantum Image Compression
             </motion.h2>
             <motion.p 
-              className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed"
+              className="text-base md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -51,28 +51,28 @@ export default function WelcomeSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto"
           >
-            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-6 rounded-xl border border-space-600">
-              <Rocket className="w-8 h-8 text-neon-400 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-4 sm:p-6 rounded-xl border border-space-600">
+              <Rocket className="w-7 h-7 sm:w-8 sm:h-8 text-neon-400 mx-auto mb-2 sm:mb-3" />
               <h3 className="font-semibold text-sm">Ultra Fast</h3>
               <p className="text-xs text-gray-400 mt-1">Lightning speed processing</p>
             </div>
 
-            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-6 rounded-xl border border-space-600">
-              <Brain className="w-8 h-8 text-plasma-400 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-4 sm:p-6 rounded-xl border border-space-600">
+              <Brain className="w-7 h-7 sm:w-8 sm:h-8 text-plasma-400 mx-auto mb-2 sm:mb-3" />
               <h3 className="font-semibold text-sm">Linear Algebra</h3>
               <p className="text-xs text-gray-400 mt-1">Applied SVD concepts</p>
             </div>
 
-            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-6 rounded-xl border border-space-600">
-              <Zap className="w-8 h-8 text-matrix-400 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-4 sm:p-6 rounded-xl border border-space-600">
+              <Zap className="w-7 h-7 sm:w-8 sm:h-8 text-matrix-400 mx-auto mb-2 sm:mb-3" />
               <h3 className="font-semibold text-sm">High Quality</h3>
               <p className="text-xs text-gray-400 mt-1">Preserve image fidelity</p>
             </div>
 
-            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-6 rounded-xl border border-space-600">
-              <Target className="w-8 h-8 text-quantum-400 mx-auto mb-3" />
+            <div className="bg-gradient-to-br from-space-800/50 to-space-700/50 p-4 sm:p-6 rounded-xl border border-space-600">
+              <Target className="w-7 h-7 sm:w-8 sm:h-8 text-quantum-400 mx-auto mb-2 sm:mb-3" />
               <h3 className="font-semibold text-sm">Precise Control</h3>
               <p className="text-xs text-gray-400 mt-1">Fine-tune compression</p>
             </div>
@@ -98,7 +98,7 @@ export default function WelcomeSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="mt-12"
+            className="mt-8 sm:mt-12"
           >
             <div className="animate-bounce">
               <svg className="w-6 h-6 mx-auto text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">

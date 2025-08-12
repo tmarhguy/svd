@@ -206,7 +206,7 @@ npm run dev
 
 ### Prerequisites
 
-- **Node.js 18+** - [Download](https://nodejs.org/)
+- **Node.js 20.x** - [Download](https://nodejs.org/)
 - **Modern Web Browser** - Chrome, Firefox, Safari, or Edge
 
 ### Setup
@@ -246,15 +246,29 @@ The application uses default configurations optimized for most use cases. For ad
 
    ```bash
    # Frontend (.env.local)
-   NEXT_PUBLIC_MAX_FILE_SIZE=10485760  # 10MB
-   NEXT_PUBLIC_ALLOWED_EXTENSIONS=jpg,jpeg,png,bmp
+   # File handling and compute budgets
+   NEXT_PUBLIC_FILE_SIZE_LIMIT=20971520      # 20MB default
+   NEXT_PUBLIC_MAX_LOAD_DIM=1024             # max dimension on load
+   NEXT_PUBLIC_LARGE_CROP_SIDE=1024          # fallback square crop side
+
+   # Compute pipeline
+   NEXT_PUBLIC_COMPUTE_DIM=256               # working compute dimension
+   NEXT_PUBLIC_PREVIEW_DIM=128               # instant preview dimension
+   NEXT_PUBLIC_MAX_COMPUTE_PIXELS=2000000    # ~2MP compute budget
+   NEXT_PUBLIC_ENABLE_WORKERS=1              # set 0 to disable web workers
    ```
 
 2. **Performance tuning**:
+
    ```bash
    # Client-side processing settings
-   NEXT_PUBLIC_WORKER_THREADS=4
-   NEXT_PUBLIC_CHUNK_SIZE=1024
+   # Workers are enabled by default; set to 0 to force main-thread fallback
+   NEXT_PUBLIC_ENABLE_WORKERS=1
+
+   # Adjust compute budget for slower/faster devices
+   NEXT_PUBLIC_COMPUTE_DIM=256
+   NEXT_PUBLIC_PREVIEW_DIM=128
+   NEXT_PUBLIC_MAX_COMPUTE_PIXELS=2000000
    ```
 
 ## Deployment
@@ -298,14 +312,16 @@ This project is optimized for Vercel deployment with zero configuration:
 For production customization, set these in your Vercel dashboard:
 
 ```bash
-# Performance Settings
-NEXT_PUBLIC_MAX_FILE_SIZE=10485760
-NEXT_PUBLIC_MAX_IMAGE_DIMENSION=2048
-NEXT_PUBLIC_WORKER_THREADS=4
+# File handling and compute budgets
+NEXT_PUBLIC_FILE_SIZE_LIMIT=20971520
+NEXT_PUBLIC_MAX_LOAD_DIM=1024
+NEXT_PUBLIC_LARGE_CROP_SIDE=1024
 
-# UI Configuration
-NEXT_PUBLIC_DEFAULT_QUALITY=85
-NEXT_PUBLIC_ENABLE_ANIMATIONS=true
+# Compute pipeline
+NEXT_PUBLIC_COMPUTE_DIM=256
+NEXT_PUBLIC_PREVIEW_DIM=128
+NEXT_PUBLIC_MAX_COMPUTE_PIXELS=2000000
+NEXT_PUBLIC_ENABLE_WORKERS=1
 ```
 
 #### **Custom Domain**
@@ -349,7 +365,7 @@ npm run start
 1. **Upload Image:**
    - Drag and drop an image file or click to browse
    - Supported formats: JPG, PNG, BMP
-   - Maximum file size: 10MB
+   - Maximum file size: configurable (default 20MB)
 
 2. **Adjust Compression Settings:**
    - **Rank Slider**: Control the number of singular values (1-100)
@@ -452,6 +468,7 @@ Reports saved locally as `lighthouse-prod-desktop.json` and `lighthouse-prod-mob
 - Capped compute size to a predictable budget (computeDim <= 256)
 - Reduced SVD effort for startup (rank cap 24, iterations <= 20, power-iteration)
 - Debounced slider recompute; reconstruction uses precomputed factors
+- Approximate-first SVD, then exact SVD with incremental low-rank updates
 - Preserved original aspect ratio and prevented layout shifts (CLS = 0)
 
 ### Planned/Recommended for better LCP (< 4s)
@@ -502,9 +519,13 @@ Summary of applied optimizations that improved responsiveness and startup time:
 Environment defaults (can be adjusted via `.env.local`):
 
 ```
-NEXT_PUBLIC_WORKER_THREADS=4
-NEXT_PUBLIC_MAX_IMAGE_DIMENSION=2048
+NEXT_PUBLIC_FILE_SIZE_LIMIT=20971520
+NEXT_PUBLIC_MAX_LOAD_DIM=1024
+NEXT_PUBLIC_LARGE_CROP_SIDE=1024
 NEXT_PUBLIC_COMPUTE_DIM=256
+NEXT_PUBLIC_PREVIEW_DIM=128
+NEXT_PUBLIC_MAX_COMPUTE_PIXELS=2000000
+NEXT_PUBLIC_ENABLE_WORKERS=1
 ```
 
 ## Architecture
@@ -761,6 +782,6 @@ This is a final project for MATH 3120: Numerical Linear Algebra at the Universit
 
 _Academic Final Project by [Tyrone Marhguy](https://github.com/tmarhguy) for MATH 3120: Numerical Linear Algebra_  
 _University of Pennsylvania, School of Engineering and Applied Science_  
-_Fall 2025 - Computer Engineering Class of 2028_
+_Fall 2024 - Computer Engineering Class of 2028_
 
 </div>

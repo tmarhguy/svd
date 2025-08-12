@@ -43,3 +43,5 @@ yarn-error.log*
 # Local reports/artifacts
 lighthouse-*.json
 *.report.html
+
+.svd-image-compression-demo-main/

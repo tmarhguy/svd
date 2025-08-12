@@ -25,7 +25,6 @@ export default function MatrixRepresentation({ file, compressionResult }: Matrix
   const [error, setError] = useState<string>("");
   const [selectedChannel, setSelectedChannel] = useState<number>(0); // 0:R,1:G,2:B
   const [viewMode, setViewMode] = useState<'color' | 'numbers'>('color');
-  const [source, setSource] = useState<'compressed' | 'original'>('compressed');
   const [palette, setPalette] = useState<'hue' | 'channel'>('hue');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -48,8 +47,7 @@ export default function MatrixRepresentation({ file, compressionResult }: Matrix
 
   // Load and sample to exactly 256x256 square for consistent visualization
   const loadMatrixData = useCallback(async () => {
-    const useCompressed = source === 'compressed' && !!compressionResult?.compressedImage;
-    if (!useCompressed && !file) return;
+    if (!file) return;
 
     setLoading(true);
     setError("");
@@ -62,19 +60,12 @@ export default function MatrixRepresentation({ file, compressionResult }: Matrix
       let sourceObj: CanvasImageSource | null = null;
       let sw = 0, sh = 0;
 
-      // Decode either compressed image (data URL) or original file
+      // Decode original file
       try {
         if (typeof createImageBitmap === 'function') {
-          if (useCompressed) {
-            const blob = await (await fetch(compressionResult!.compressedImage)).blob();
-            const bmp = await createImageBitmap(blob);
-            sourceObj = bmp;
-            sw = bmp.width; sh = bmp.height;
-          } else if (file) {
-            const bmp = await createImageBitmap(file);
-            sourceObj = bmp;
-            sw = bmp.width; sh = bmp.height;
-          }
+          const bmp = await createImageBitmap(file);
+          sourceObj = bmp;
+          sw = bmp.width; sh = bmp.height;
         }
       } catch {}
 
@@ -83,7 +74,7 @@ export default function MatrixRepresentation({ file, compressionResult }: Matrix
         await new Promise((resolve, reject) => {
           img.onload = resolve;
           img.onerror = reject;
-          img.src = useCompressed ? compressionResult!.compressedImage : URL.createObjectURL(file!);
+          img.src = URL.createObjectURL(file!);
         });
         sourceObj = img;
         sw = (sourceObj as HTMLImageElement).width;
@@ -98,8 +89,8 @@ export default function MatrixRepresentation({ file, compressionResult }: Matrix
       canvas.width = target;
       canvas.height = target;
       ctx.clearRect(0, 0, target, target);
-      (ctx as any).imageSmoothingEnabled = true;
-      (ctx as any).imageSmoothingQuality = 'high';
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(sourceObj, cropX, cropY, side, side, 0, 0, target, target);
 
       const imageData = ctx.getImageData(0, 0, target, target);
@@ -134,13 +125,13 @@ export default function MatrixRepresentation({ file, compressionResult }: Matrix
     } finally {
       setLoading(false);
     }
-  }, [file, compressionResult, source]);
+  }, [file]);
 
   useEffect(() => {
     if (showMatrix && file) {
       loadMatrixData();
     }
-  }, [showMatrix, file, source, compressionResult, loadMatrixData]);
+  }, [showMatrix, file, loadMatrixData]);
 
   const currentMatrix = useMemo(() => {
     if (!matrixData?.channels) return [] as number[][];
@@ -274,28 +265,19 @@ export default function MatrixRepresentation({ file, compressionResult }: Matrix
                 {/* Tabs + View mode */}
                 <div className="flex flex-wrap items-center gap-4 mb-4">
                   <div className="flex items-center gap-2">
-                    <button className={tabClass(palette==='channel' && selectedChannel===0)} onClick={() => { setPalette('channel'); setSelectedChannel(0); }}>Red</button>
-                    <button className={tabClass(palette==='channel' && selectedChannel===1)} onClick={() => { setPalette('channel'); setSelectedChannel(1); }}>Green</button>
-                    <button className={tabClass(palette==='channel' && selectedChannel===2)} onClick={() => { setPalette('channel'); setSelectedChannel(2); }}>Blue</button>
+                    <button className={tabClass(palette==='channel' && selectedChannel===0)} onClick={() => { setPalette('channel'); setSelectedChannel(0); }}>
+                      <span className="text-red-400">Red</span>
+                    </button>
+                    <button className={tabClass(palette==='channel' && selectedChannel===1)} onClick={() => { setPalette('channel'); setSelectedChannel(1); }}>
+                      <span className="text-green-400">Green</span>
+                    </button>
+                    <button className={tabClass(palette==='channel' && selectedChannel===2)} onClick={() => { setPalette('channel'); setSelectedChannel(2); }}>
+                      <span className="text-blue-400">Blue</span>
+                    </button>
                     <button className={tabClass(palette==='hue')} onClick={() => setPalette('hue')}>Hue</button>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-400 text-sm">Source:</span>
-                    <button
-                      className={`px-3 py-1 rounded-md text-sm border ${source==='compressed' ? 'bg-purple-600 border-purple-500 text-white' : 'bg-space-700 border-space-600 text-gray-300 hover:bg-space-600'}`}
-                      onClick={() => setSource('compressed')}
-                      disabled={!compressionResult?.compressedImage}
-                    >
-                      Compressed
-                    </button>
-                    <button
-                      className={`px-3 py-1 rounded-md text-sm border ${source==='original' ? 'bg-purple-600 border-purple-500 text-white' : 'bg-space-700 border-space-600 text-gray-300 hover:bg-space-600'}`}
-                      onClick={() => setSource('original')}
-                    >
-                      Original
-                    </button>
-                  </div>
+                  {/* Source toggle removed */}
 
                   <div className="ml-auto flex items-center gap-3 text-sm">
                     <div className="flex items-center gap-2">
@@ -314,9 +296,12 @@ export default function MatrixRepresentation({ file, compressionResult }: Matrix
                 <div className="overflow-auto max-h-96">
                   <div className="inline-block">
                     <div className="text-xs text-gray-400 mb-2">
-                      {(palette==='hue' ? 'Hue' : ['Red','Green','Blue'][selectedChannel])} Matrix (
+                      <span className={palette==='hue' ? 'text-sky-400' : (selectedChannel===0 ? 'text-red-400' : selectedChannel===1 ? 'text-green-400' : 'text-blue-400')}>
+                        {palette==='hue' ? 'Hue' : ['Red','Green','Blue'][selectedChannel]}
+                      </span>
+                      {` `}Matrix (
                         {viewMode === 'color' ? `${matrixData.rows} × ${matrixData.cols}` : `${Math.floor(matrixData.rows/2)} × ${Math.floor(matrixData.cols/2)}`}
-                      ) — {source === 'compressed' ? 'Compressed' : 'Original'}
+                      )
                     </div>
                     {viewMode === 'color' ? (
                       <canvas ref={canvasRef} className="bg-space-900 rounded border border-space-700" />

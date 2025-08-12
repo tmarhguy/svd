@@ -63,13 +63,13 @@ export default function Quiz() {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <div className="flex items-center justify-center space-x-3 mb-4">
-          <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
-            <Brain className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-center space-x-3 mb-3 sm:mb-4">
+          <div className="p-2.5 sm:p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
+            <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-blue-400">Test Your Knowledge</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-blue-400">Test Your Knowledge</h3>
         </div>
-        <p className="text-gray-300">
+        <p className="text-gray-300 text-sm sm:text-base">
           Answer these questions to test your understanding of SVD and image compression.
         </p>
       </div>
@@ -82,14 +82,14 @@ export default function Quiz() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600"
+            className="bg-gradient-to-br from-space-800 to-space-700 p-5 sm:p-6 rounded-xl border border-space-600"
           >
-            <h4 className="text-lg font-semibold text-blue-400 mb-4">
+            <h4 className="text-base sm:text-lg font-semibold text-blue-400 mb-3 sm:mb-4">
               Question {question.id}
             </h4>
-            <p className="text-gray-300 mb-4">{question.question}</p>
+            <p className="text-gray-300 mb-3 sm:mb-4 text-sm sm:text-base">{question.question}</p>
             
-            <div className="flex space-x-4 mb-4">
+            <div className="flex space-x-3 sm:space-x-4 mb-3 sm:mb-4">
               <button
                 onClick={() => handleAnswer(question.id, true)}
                 className={`px-4 py-2 rounded-lg transition-all duration-200 ${
@@ -116,7 +116,7 @@ export default function Quiz() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="mt-4 p-4 rounded-lg bg-space-800/50"
+                className="mt-3 sm:mt-4 p-3 sm:p-4 rounded-lg bg-space-800/50"
               >
                 <div className="flex items-center space-x-2 mb-2">
                   {answers[question.id] === question.answer ? (
@@ -130,7 +130,7 @@ export default function Quiz() {
                     {answers[question.id] === question.answer ? "Correct!" : "Incorrect"}
                   </span>
                 </div>
-                <p className="text-sm text-gray-400">{question.explanation}</p>
+                <p className="text-xs sm:text-sm text-gray-400">{question.explanation}</p>
               </motion.div>
             )}
           </motion.div>
@@ -150,13 +150,13 @@ export default function Quiz() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="hologram-card p-6 rounded-xl max-w-md mx-auto"
+            className="hologram-card p-5 sm:p-6 rounded-xl max-w-md mx-auto"
           >
-            <h4 className="text-xl font-semibold neon-text mb-2">Your Score</h4>
-            <div className={`text-3xl font-bold ${getScoreColor(calculateScore())}`}>
+            <h4 className="text-lg sm:text-xl font-semibold neon-text mb-2">Your Score</h4>
+            <div className={`text-2xl sm:text-3xl font-bold ${getScoreColor(calculateScore())}`}>
               {calculateScore()}%
             </div>
-            <p className="text-sm text-gray-400 mt-2">
+            <p className="text-xs sm:text-sm text-gray-400 mt-2">
               {calculateScore() >= 80 
                 ? "Excellent! You have a strong understanding of SVD."
                 : calculateScore() >= 60

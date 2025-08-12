@@ -4,12 +4,11 @@ import { useState, useEffect, lazy, Suspense, useCallback, useMemo, memo, useRef
 import dynamic from "next/dynamic";
 import NextImage from "next/image";
 import { Gauge } from "../components/icons";
-import { CompressionResult, CompressionOptions, precomputeSVD, reconstructFromPrecomputed } from "../utils/svdCompression";
+import { CompressionResult, CompressionOptions, precomputeSVD, reconstructFromPrecomputed, startStatefulCompression, StatefulCompressionSession } from "../utils/svdCompression";
 import { useSampleData } from "../hooks/useSampleData";
 
 import DropZone from "../components/DropZone";
 import WelcomeSection from "../components/WelcomeSection";
-import ProcessingProgressRing from "../components/ProcessingProgressRing";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 // Lazy load heavy components
@@ -36,13 +35,15 @@ const ControlPanel = memo(({
   onOptionsChange,
   processingProgress,
   loading,
-  compressionResult 
+  compressionResult,
+  maxRank
 }: {
   compressionOptions: CompressionOptions;
   onOptionsChange: (options: CompressionOptions) => void;
   processingProgress: number;
   loading: boolean;
   compressionResult: CompressionResult | null;
+  maxRank: number;
 }) => {
   const handleRankChange = useCallback((value: number) => {
     onOptionsChange({ ...compressionOptions, rank: value });
@@ -58,6 +59,117 @@ const ControlPanel = memo(({
       algorithm: value as 'power-iteration' | 'jacobi' | 'qr-iteration' 
     });
   }, [compressionOptions, onOptionsChange]);
+
+  // Nonlinear slider mapping: stretch [1..pivotRank] over pivotFrac of track
+  const pivotRank = Math.min(50, Math.max(2, Math.floor(maxRank * 0.2)));
+  const pivotFrac = 0.7; // 70% of track dedicated to low ranks
+  const sliderMax = 1000; // high-resolution track for smooth mapping
+
+  const rankToSlider = (rank: number): number => {
+    const r = Math.max(1, Math.min(maxRank, Math.floor(rank)));
+    if (maxRank <= 1) return 0;
+    if (maxRank <= pivotRank) {
+      return Math.round(((r - 1) / (maxRank - 1)) * sliderMax);
+    }
+    if (r <= pivotRank) {
+      return Math.round(((r - 1) / (pivotRank - 1)) * pivotFrac * sliderMax);
+    }
+    return Math.round((pivotFrac + ((r - pivotRank) / (maxRank - pivotRank)) * (1 - pivotFrac)) * sliderMax);
+  };
+
+  const sliderToRank = (pos: number): number => {
+    const p = Math.max(0, Math.min(1, pos / sliderMax));
+    if (maxRank <= 1) return 1;
+    if (maxRank <= pivotRank) {
+      return Math.max(1, Math.min(maxRank, Math.round(1 + p * (maxRank - 1))));
+    }
+    if (p <= pivotFrac) {
+      const local = p / pivotFrac;
+      return Math.max(1, Math.min(pivotRank, Math.round(1 + local * (pivotRank - 1))));
+    }
+    const local = (p - pivotFrac) / (1 - pivotFrac);
+    return Math.max(pivotRank, Math.min(maxRank, Math.round(pivotRank + local * (maxRank - pivotRank))));
+  };
+
+  const sliderValue = rankToSlider(compressionOptions.rank || 1);
+  const rangeRef = useRef<HTMLInputElement | null>(null);
+  const [trackWidth, setTrackWidth] = useState<number>(0);
+  useEffect(() => {
+    const el = rangeRef.current;
+    if (!el) return;
+    const update = () => setTrackWidth(el.clientWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener('resize', update);
+    return () => { ro.disconnect(); window.removeEventListener('resize', update); };
+  }, []);
+
+  // Accessible keyboard controls mapped in rank units (not raw slider units)
+  const onSliderKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      const rankNow = compressionOptions.rank || 1;
+      let nextRank: number | null = null;
+      const stepSmall = 1;
+      const stepMedium = 5;
+      const stepLarge = 10;
+      const isShift = e.shiftKey;
+      const isCtrlOrMeta = e.ctrlKey || e.metaKey;
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'ArrowDown':
+          nextRank = rankNow - (isCtrlOrMeta ? stepLarge : isShift ? stepMedium : stepSmall);
+          break;
+        case 'ArrowRight':
+        case 'ArrowUp':
+          nextRank = rankNow + (isCtrlOrMeta ? stepLarge : isShift ? stepMedium : stepSmall);
+          break;
+        case 'PageDown':
+          nextRank = rankNow - stepLarge;
+          break;
+        case 'PageUp':
+          nextRank = rankNow + stepLarge;
+          break;
+        case 'Home':
+          nextRank = 1;
+          break;
+        case 'End':
+          nextRank = maxRank;
+          break;
+      }
+      if (nextRank != null) {
+        e.preventDefault();
+        handleRankChange(Math.max(1, Math.min(maxRank, nextRank)));
+      }
+    },
+    [compressionOptions.rank, handleRankChange, maxRank]
+  );
+
+  // Build irregular tick marks reflecting the nonlinear scale
+  const tickRanks = useMemo(() => {
+    const base = [1, 2, 3, 5, 10, 20, 30, 40, 50, 60, 80, 100, 150, 200, 256, 300, 400, 500];
+    let ranks = base.filter((r) => r <= maxRank);
+    if (!ranks.includes(maxRank)) ranks = [...ranks, maxRank];
+    // Deduplicate and sort
+    ranks = Array.from(new Set(ranks)).sort((a, b) => a - b);
+    return ranks;
+  }, [maxRank]);
+  const labelRanks = useMemo(() => {
+    const minDelta = Math.floor(sliderMax * 0.09); // require ~9% spacing between labels
+    let lastPos = -Infinity;
+    const out: number[] = [];
+    for (const r of tickRanks) {
+      if (!(r === 1 || r >= 5)) continue; // hide 2–4 to reduce clutter
+      const pos = rankToSlider(r);
+      if (out.length === 0 || pos - lastPos >= minDelta) {
+        out.push(r);
+        lastPos = pos;
+      }
+    }
+    // Ensure last label (maxRank) is included even if spacing is tight
+    if (!out.includes(maxRank)) out.push(maxRank);
+    return out;
+  }, [tickRanks, maxRank]);
 
   return (
     <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
@@ -78,13 +190,43 @@ const ControlPanel = memo(({
             </span>
           </label>
           <input
+            ref={rangeRef}
             type="range"
-            min="5"
-            max="100"
-            value={compressionOptions.rank}
-            onChange={(e) => handleRankChange(parseInt(e.target.value))}
-            className="w-full h-2 bg-space-600 rounded-lg appearance-none cursor-pointer slider"
+            min={0}
+            max={sliderMax}
+            step={1}
+            value={sliderValue}
+            onChange={(e) => handleRankChange(sliderToRank(parseInt(e.target.value)))}
+            onKeyDown={onSliderKeyDown}
+            aria-label="Rank (k)"
+            aria-valuemin={1}
+            aria-valuemax={maxRank}
+            aria-valuenow={compressionOptions.rank}
+            aria-valuetext={`k = ${compressionOptions.rank}`}
+            list="rank-ticks"
+            className="w-full rounded-lg appearance-none cursor-pointer slider"
           />
+          <datalist id="rank-ticks">
+            {tickRanks.map((r) => (
+              <option key={r} value={rankToSlider(r)} label={String(r)} />
+            ))}
+          </datalist>
+          <div className="relative h-4 mt-1 select-none">
+            {labelRanks.map((r) => (
+              <span
+                key={`label-${r}`}
+                className="absolute text-[10px] text-gray-500"
+                style={{
+                  left: trackWidth
+                    ? `${(rankToSlider(r) / sliderMax) * trackWidth + (r === 10 ? 8 : 0)}px`
+                    : `${(rankToSlider(r) / sliderMax) * 100}%`,
+                  transform: 'translateX(-50%)',
+                }}
+              >
+                {r}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* Color Mix Control */}
@@ -128,16 +270,7 @@ const ControlPanel = memo(({
           Tip: Smaller images (lower resolution) process and update faster. Large uploads may be downscaled for responsiveness.
         </p>
 
-        {/* Progress Indicator */}
-        {loading && (
-          <div className="flex items-center justify-center py-4">
-            <ProcessingProgressRing
-              progress={processingProgress}
-              done={false}
-              label="Processing"
-            />
-          </div>
-        )}
+        {/* Progress Indicator removed */}
 
         {/* Compression Stats */}
         {compressionResult && !loading && (
@@ -179,7 +312,11 @@ export default function Home() {
     maxIterations: 35
   });
   const [compressedUrl, setCompressedUrl] = useState<string>("");
+  const sessionRef = useRef<StatefulCompressionSession | null>(null);
   const previousCompressedUrlRef = useRef<string>("");
+  // Track processing time for uploaded images (stateful path)
+  const uploadStartTimeRef = useRef<number | null>(null);
+  const uploadMeasuredRef = useRef<boolean>(false);
   const [originalUrl, setOriginalUrl] = useState<string>("");
   const previousOriginalUrlRef = useRef<string>("");
   const [originalAspect, setOriginalAspect] = useState<number>(1);
@@ -233,7 +370,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
-  const [processingProgress, setProcessingProgress] = useState(0);
+  // Progress ring removed
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const [precomputed, setPrecomputed] = useState<{
@@ -284,6 +421,12 @@ export default function Home() {
     semester: "Fall 2024",
     university: "University of Pennsylvania"
   }), []);
+  // Compute dynamic max rank with a responsiveness cap
+  const dynamicMaxRank = useMemo(() => {
+    const fromMeta = compressionResult?.metadata?.maxRank ?? precomputed?.metadata?.maxRank ?? 256;
+    return Math.max(1, Math.min(1024, Math.floor(fromMeta)));
+  }, [compressionResult?.metadata?.maxRank, precomputed?.metadata?.maxRank]);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -293,33 +436,56 @@ export default function Home() {
   const handleCompression = useCallback(async (imageFile: File, options: CompressionOptions) => {
     setLoading(true);
     setError("");
-    setProcessingProgress(0);
+    // Start timing for uploaded image processing
+    uploadStartTimeRef.current = performance.now();
+    uploadMeasuredRef.current = false;
 
-    const progressInterval = setInterval(() => {
-      setProcessingProgress(prev => Math.min(prev + 5, 90));
-    }, 200);
+    // progress ring removed
 
     try {
-      const precomputedData = await precomputeSVD(imageFile, options);
-      setPrecomputed(precomputedData);
-
-      const svdData: Record<string, number[]> = {};
-      precomputedData.factors.forEach((factor, idx) => {
-        svdData[idx === 0 ? 'red' : idx === 1 ? 'green' : 'blue'] = factor.S;
-      });
-      setSingularValues(svdData);
-
-      const result = await reconstructFromPrecomputed(precomputedData, options.rank || 30, options);
-      setCompressionResult(result);
-      setCompressedUrl(result.compressedImage);
-      setProcessingProgress(100);
+      // Prefer new stateful pipeline with streaming updates
+      sessionRef.current?.dispose();
+      sessionRef.current = await startStatefulCompression(imageFile, options.rank || 30, (update) => {
+        setCompressedUrl(update.imageUrl);
+        // Continuously feed the performance monitor with size info as frames stream in
+        setCompressionResult((prev) => prev ? {
+          ...prev,
+          compressedImage: update.imageUrl,
+          compressedSize: Math.ceil(update.imageUrl.length * 0.75),
+          compressionRatio: Math.max(0, Math.min(100, ((imageFile.size - Math.ceil(update.imageUrl.length * 0.75)) / Math.max(1, imageFile.size)) * 100)),
+          quality: prev.quality || 0,
+        } : {
+          compressedImage: update.imageUrl,
+          singularValues: [],
+          originalSize: imageFile.size,
+          compressedSize: Math.ceil(update.imageUrl.length * 0.75),
+          rank: options.rank || 30,
+          error: 0,
+          quality: 0,
+          compressionRatio: Math.max(0, Math.min(100, ((imageFile.size - Math.ceil(update.imageUrl.length * 0.75)) / Math.max(1, imageFile.size)) * 100)),
+          processingTime: 0,
+          metadata: { width: update.width, height: update.height, channels: 3, format: imageFile.type || 'image/jpeg', colorSpace: 'rgb', maxRank: Math.min(update.width, update.height), optimalRank: Math.min(Math.min(update.width, update.height), Math.floor(Math.min(update.width, update.height) * 0.1)) }
+        });
+        setSingularValues({
+          red: update.singularValues.red,
+          green: update.singularValues.green,
+          blue: update.singularValues.blue,
+        });
+        // When the exact (non-approximate) frame arrives for the first time, record final processing time
+        if (!update.isApproximation && !uploadMeasuredRef.current && uploadStartTimeRef.current != null) {
+          uploadMeasuredRef.current = true;
+          const elapsed = performance.now() - uploadStartTimeRef.current;
+          setCompressionResult((prev) => prev ? { ...prev, processingTime: elapsed } : prev);
+        }
+      }, options.colorMix ?? 1);
+      // progress ring removed
+      // Also set a summary CompressionResult-like object for metrics panel using current image
+      setCompressionResult((prev) => prev ? { ...prev, compressedImage: compressedUrl, rank: options.rank || 30 } : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Compression failed");
       console.error("Compression error:", err);
     } finally {
-      clearInterval(progressInterval);
       setLoading(false);
-      setTimeout(() => setProcessingProgress(0), 1000);
     }
   }, []);
 
@@ -425,19 +591,28 @@ export default function Home() {
     }
 
     debounceTimeout.current = setTimeout(async () => {
+      // Route updates through stateful session if available
+      const rank = newOptions.rank || 30;
+      const colorMix = newOptions.colorMix ?? 1;
+      if (sessionRef.current) {
+        sessionRef.current.setRank(rank);
+        // @ts-ignore expose setColorMix via session
+        (sessionRef.current as any).setColorMix?.(colorMix);
+        return;
+      }
+      // Fallback to legacy path
       setLoading(true);
       try {
         if (precomputed) {
-          // Use fast reconstruction if precomputed data is available
-          const result = await reconstructFromPrecomputed(precomputed, newOptions.rank || 30, newOptions);
-          setCompressionResult(result);
+          const result = await reconstructFromPrecomputed(precomputed, rank, newOptions);
+          // Preserve initial processingTime so it doesn't change on each slider move for default image
+          setCompressionResult((prev) => {
+            const preservedTime = prev?.processingTime ?? result.processingTime;
+            return { ...result, processingTime: preservedTime };
+          });
           setCompressedUrl(result.compressedImage);
         } else if (file) {
-          // Otherwise, perform a full compression
           await handleCompression(file, newOptions);
-        } else {
-          // No inputs available yet; skip
-          return;
         }
       } catch (err) {
         console.error("Compression/Reconstruction error:", err);
@@ -445,8 +620,19 @@ export default function Home() {
       } finally {
         setLoading(false);
       }
-    }, isDefaultImage ? 50 : 250); // Shorter delay for responsive sample, longer for uploads
+    }, isDefaultImage ? 50 : 250);
   }, [file, precomputed, isDefaultImage, handleCompression]);
+
+  // Cleanup session on unmount or when file changes
+  useEffect(() => {
+    return () => {
+      sessionRef.current?.dispose();
+      sessionRef.current = null;
+    };
+  }, []);
+
+  // Treat default-image operations like non-blocking (no visible processing ring/state)
+  const effectiveLoading = loading && !isDefaultImage;
 
 
   return (
@@ -456,13 +642,13 @@ export default function Home() {
         <WelcomeSection />
 
         {/* Interactive Demo Section */}
-        <section id="demo" className="py-20 px-6">
+        <section id="demo" className="py-12 sm:py-20 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">
                 Interactive SVD Compression
               </h2>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
                 Experience the power of Singular Value Decomposition in real-time. 
                 Upload an image or use our default to see how mathematical decomposition 
                 can achieve impressive compression ratios while preserving visual quality.
@@ -470,7 +656,7 @@ export default function Home() {
                       </div>
                       
                         {/* File Upload Area */}
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <DropZone onFile={(file) => handleFileDrop([file])} />
               
               {/* Show sample loading status */}
@@ -498,23 +684,34 @@ export default function Home() {
                 <div className="mt-4">
                   <button
                     onClick={async () => {
+                      // Stop any active streaming session from the uploaded image to avoid overwriting state
+                      try { sessionRef.current?.dispose(); } catch {}
+                      sessionRef.current = null;
                       const sampleFile = await getSampleFile();
                       if (sampleFile) {
                         setFile(sampleFile);
                         setIsDefaultImage(true);
-                        const result = getPrecomputedResult(compressionOptions.rank || 30);
-                        if (result) {
-                          setCompressionResult(result);
-                          setCompressedUrl(result.compressedImage);
-                        }
+                          const rankNow = compressionOptions.rank || 30;
+                          const result = getPrecomputedResult(rankNow);
+                          const precomputedData = getPrecomputedData();
+                          if (result) {
+                            setCompressionResult(result);
+                            setCompressedUrl(result.compressedImage);
+                          } else if (precomputedData) {
+                            try {
+                              const reconstructed = await reconstructFromPrecomputed(precomputedData, rankNow, compressionOptions);
+                              setCompressionResult(reconstructed);
+                              setCompressedUrl(reconstructed.compressedImage);
+                              setPrecomputed(precomputedData);
+                            } catch {}
+                          }
                         const singularVals = getSingularValues();
                         if (singularVals.red && singularVals.green && singularVals.blue) {
                           setSingularValues(singularVals);
                         }
-                        const precomputedData = getPrecomputedData();
-                        if (precomputedData) {
-                          setPrecomputed(precomputedData);
-                        }
+                          if (precomputedData) {
+                            setPrecomputed(precomputedData);
+                          }
                       }
                     }}
                     className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm"
@@ -529,24 +726,24 @@ export default function Home() {
 
             {/* Compression Interface */}
             {file && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 {/* Controls */}
                 <div className="lg:col-span-1">
                   <ControlPanel
                     compressionOptions={compressionOptions}
                     onOptionsChange={handleOptionsChange}
-                    processingProgress={processingProgress}
-                    loading={loading}
+                    loading={effectiveLoading}
                 compressionResult={compressionResult}
+                maxRank={dynamicMaxRank}
               />
             </div>
               
                 {/* Image Comparison */}
                 <div className="lg:col-span-2">
-                  <div className="grid grid-cols-2 gap-6 items-stretch">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-stretch">
                     {/* Original Image */}
               <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
-                      <h3 className="text-lg font-semibold mb-4 text-center">Original</h3>
+                      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">Original</h3>
                       <div className="relative rounded-lg overflow-hidden bg-black/50" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
                         {isClient && originalUrl && (
                           <NextImage 
@@ -562,7 +759,7 @@ export default function Home() {
  
                      {/* Compressed Image */}
                 <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
-                      <h3 className="text-lg font-semibold mb-4 text-center">
+                      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">
                         Compressed (k={compressionOptions.rank})
                   </h3>
                       <div className="relative rounded-lg overflow-hidden bg-black/50" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
@@ -581,18 +778,25 @@ export default function Home() {
 
               {/* Performance Monitor */}
                   {isClient && (
-                    <div className="mt-6">
-              <PerformanceMonitor 
-                isProcessing={loading}
-                metrics={compressionResult ? {
-                  processingTime: compressionResult.processingTime,
-                          memoryUsage: compressionResult.compressedSize,
-                          cpuUsage: 0,
-                  compressionRatio: compressionResult.compressionRatio,
-                  qualityScore: compressionResult.quality
-                } : null}
-                        onMetricsUpdate={() => {}}
-                      />
+                    <div className="mt-4 sm:mt-6">
+                  <PerformanceMonitor 
+                isProcessing={effectiveLoading}
+                metrics={compressionResult && compressionResult.metadata ? (() => {
+                  const actualCompression = Number.isFinite(compressionResult.compressionRatio)
+                    ? compressionResult.compressionRatio
+                    : 0;
+                  return {
+                    processingTime: Math.max(1, compressionResult.processingTime),
+                    memoryUsage: compressionResult.compressedSize,
+                    cpuUsage: 0,
+                    compressionRatio: Math.max(0, Math.min(100, actualCompression)),
+                    qualityScore: compressionResult.quality,
+                    originalSize: compressionResult.originalSize,
+                    compressedSize: compressionResult.compressedSize,
+                  };
+                })() : null}
+                colorMix={compressionOptions.colorMix ?? 1}
+              />
                     </div>
                   )}
                 </div>
@@ -600,19 +804,20 @@ export default function Home() {
             )}
 
             {/* Matrix Representation */}
-            {file && !loading && (
-              <div className="mt-12">
+            {file && !effectiveLoading && (
+              <div className="mt-8 sm:mt-12">
                 <MatrixRepresentation
                   file={file}
                   compressionResult={compressionResult}
                   singularValues={singularValues}
+                  displayAspect={originalAspect}
                 />
               </div>
             )}
 
             {/* Writeup: moved directly after Matrix */}
-            <Suspense fallback={<div className="h-96 bg-space-800 animate-pulse rounded-xl" />}>
-              <div className="mt-12">
+            <Suspense fallback={<div className="h-72 sm:h-96 bg-space-800 animate-pulse rounded-xl" />}>
+              <div className="mt-8 sm:mt-12">
                 <WriteupSection />
               </div>
             </Suspense>
@@ -621,9 +826,17 @@ export default function Home() {
 
         {/* Educational Content - Lazy Loaded */}
         <Suspense fallback={<div className="h-96 bg-space-900 animate-pulse" />}>
-          <section className="py-20 px-6 bg-gradient-to-b from-space-900 to-space-800">
+          <section className="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-space-900 to-space-800">
             <div className="max-w-7xl mx-auto">
-        <CompressionComparison />
+        <CompressionComparison 
+          originalSize={compressionResult?.originalSize ?? null}
+          compressedSize={compressionResult?.compressedSize ?? null}
+          compressionRatio={compressionResult?.compressionRatio ?? null}
+          quality={compressionResult?.quality ?? null}
+          rank={compressionOptions.rank ?? null}
+          width={compressionResult?.metadata?.width ?? null}
+          height={compressionResult?.metadata?.height ?? null}
+        />
               <SVDComputationGuide />
           </div>
         </section>
@@ -631,7 +844,7 @@ export default function Home() {
 
         {/* Interactive Content */}
         <Suspense fallback={<div className="h-96 bg-space-800 animate-pulse" />}>
-          <section className="py-20 px-6">
+          <section className="py-12 sm:py-20 px-4 sm:px-6">
             <div className="max-w-7xl mx-auto">
               <Quiz />
           </div>
@@ -640,13 +853,13 @@ export default function Home() {
 
         {/* Footer Content */}
         <Suspense fallback={null}>
-          <footer className="py-20 px-6 bg-gradient-to-t from-space-950 to-space-900">
+          <footer className="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-t from-space-950 to-space-900">
             <div className="max-w-7xl mx-auto">
               <ReferencesSection />
           <AboutAuthor />
               
               {/* Project Info */}
-              <div className="mt-12 pt-8 border-t border-space-800 text-center text-sm text-gray-400">
+              <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-space-800 text-center text-xs sm:text-sm text-gray-400">
                 <p>
                   {projectInfo.project} by {projectInfo.student}
                 </p>

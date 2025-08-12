@@ -15,9 +15,22 @@
     overflow-x: hidden;
   }
 
+  /* Improve mobile typography and spacing */
+  @media (max-width: 640px) {
+    html { font-size: 15px; }
+    body { -webkit-text-size-adjust: 100%; }
+  }
+
+  /* Prevent iOS auto-zoom on form controls (<16px triggers zoom) */
+  input, select, textarea, button {
+    font-size: 16px;
+    touch-action: manipulation;
+  }
+
   /* Simplified scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
@@ -36,6 +49,70 @@
 }
 
 @layer components {
+  /* Uniform scrollbar helper: ensures vertical and horizontal bars have same thickness */
+  .uniform-scrollbar {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #38bdf8 rgba(30, 58, 138, 0.35); /* thumb color | track color */
+    scrollbar-gutter: stable both-edges; /* Reserve space so bars don't overlay/hide */
+  }
+  .uniform-scrollbar::-webkit-scrollbar {
+    width: 8px;  /* vertical */
+    height: 8px; /* horizontal */
+  }
+  .uniform-scrollbar::-webkit-scrollbar-track {
+    background: rgba(30, 58, 138, 0.35); /* indigo-900/35 */
+    border-radius: 8px;
+  }
+  .uniform-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #38bdf8, #0ea5e9); /* sky-400 → sky-500 */
+    border-radius: 8px;
+    border: 2px solid rgba(2, 6, 23, 0.6); /* dark border for contrast */
+  }
+  .uniform-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #0ea5e9, #0284c7); /* sky-500 → sky-600 */
+  }
+
+  /* Custom always-visible scrollbar overlay for specific containers */
+  .custom-scroll-container {
+    position: relative;
+    /* Hide native scrollbars inside this container to avoid duplication */
+    scrollbar-width: none; /* Firefox */
+  }
+  .custom-scroll-container::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+  .custom-scrollbar-x,
+  .custom-scrollbar-y {
+    position: absolute;
+    pointer-events: none; /* visuals only */
+    opacity: 1;
+  }
+  .custom-scrollbar-x {
+    left: 0;
+    right: 8px; /* room for vertical bar cap */
+    bottom: 2px;
+    height: 8px;
+  }
+  .custom-scrollbar-y {
+    top: 0;
+    bottom: 8px; /* room for horizontal bar cap */
+    right: 2px;
+    width: 8px;
+  }
+  .custom-scrollbar-track {
+    background: rgba(30, 58, 138, 0.35);
+    border-radius: 8px;
+    width: 100%;
+    height: 100%;
+  }
+  .custom-scrollbar-thumb {
+    position: absolute;
+    background: linear-gradient(180deg, #38bdf8, #0ea5e9);
+    border: 2px solid rgba(2, 6, 23, 0.6);
+    border-radius: 8px;
+  }
+
   /* Simplified cyber grid - no animation */
   .cyber-grid-bg {
     background-image: 
@@ -113,11 +190,22 @@
   .slider {
     -webkit-appearance: none;
     appearance: none;
+    height: 20px; /* provide vertical room for centered thumb */
+    background: transparent; /* track styled separately for consistent centering */
+    outline: none;
+    transition: opacity 0.2s;
+  }
+
+  .slider::-webkit-slider-runnable-track {
     height: 8px;
     border-radius: 5px;
     background: #334155;
-    outline: none;
-    transition: opacity 0.2s;
+  }
+
+  .slider::-moz-range-track {
+    height: 8px;
+    border-radius: 5px;
+    background: #334155;
   }
 
   .slider::-webkit-slider-thumb {
@@ -129,6 +217,7 @@
     background: #0ea5e9;
     cursor: pointer;
     transition: background 0.2s;
+    margin-top: -6px; /* center thumb over 8px track: (20-8)/2 */
   }
 
   .slider::-moz-range-thumb {
