@@ -44,9 +44,9 @@ This folder contains project screenshots showcasing the various features and int
 
 **System Architecture Diagram**
 
-- Comprehensive technical overview of the full-stack application structure
-- Shows data flow between frontend, backend, and mathematical processing components
-- Demonstrates how academic algorithms integrate with professional software architecture
+- Comprehensive technical overview of the client-side application structure
+- Shows data flow within the browser between UI, workers, and mathematical processing components
+- Demonstrates how academic algorithms integrate with modern client-side architecture
 - Features scalable vector graphics for detailed technical documentation
 
 ### 📈 `compression-comparison.svg`

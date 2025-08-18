@@ -92,7 +92,7 @@ This academic project goes beyond traditional coursework by:
 ### Core Compression Capabilities
 
 - **Real-time SVD Processing**: Live decomposition with visual progress tracking
-- **Interactive Parameter Control**: Adjustable rank, quality, and color mix settings
+- **Interactive Parameter Control**: Adjustable rank and color mix, plus algorithm selection
 - **Multi-channel Processing**: Separate RGB channel processing for optimal compression
 - **Performance Monitoring**: Real-time metrics including processing time and compression ratios
 - **Quality Assessment**: Built-in quality scoring and visual comparison tools
@@ -100,8 +100,8 @@ This academic project goes beyond traditional coursework by:
 ### Advanced Web Interface
 
 - **Interactive Upload**: Drag-and-drop file upload with instant preview
-- **Real-time Processing**: Animated progress rings and live status updates
-- **Parameter Sliders**: Intuitive controls for rank, quality, and color adjustments
+- **Real-time Processing**: Progress bar and live status updates
+- **Parameter Controls**: Intuitive controls for rank and color mix, plus algorithm selection
 - **Visual Feedback**: Dynamic progress indicators and performance metrics
 - **Responsive Design**: Mobile-friendly interface built with React and Tailwind CSS
 
@@ -193,19 +193,13 @@ Get up and running in under 2 minutes:
 ```bash
 # Clone the repository
 git clone https://github.com/tmarhguy/svd.git
-cd svd
+cd compression-svd
 
 # Install dependencies and start
 npm install
 npm run dev
 
 # Open your browser to http://localhost:3000
-```
-
-Note: if your clone contains this app within a subfolder (e.g., `svd/compression-svd`), run `cd svd/compression-svd` instead of `cd svd`.
-
-```bash
-
 ```
 
 ## Installation
@@ -343,16 +337,12 @@ After deployment, you can add a custom domain in your Vercel dashboard for a pro
 
 ```bash
 npm run build
-# Upload .next folder to Netlify
+# Deploy as a Next.js app with SSR (functions/edge). Static export is not supported.
 ```
 
 #### **GitHub Pages**
 
-```bash
-npm run build
-npm run export
-# Deploy /out folder to GitHub Pages
-```
+Static export is not supported due to client-only features and dynamic imports.
 
 #### **Self-Hosted**
 
@@ -370,13 +360,13 @@ npm run start
 
 1. **Upload Image:**
    - Drag and drop an image file or click to browse
-   - Supported formats: JPG, PNG, BMP
+   - Supported formats: JPG, PNG, BMP, GIF (first frame only)
    - Maximum file size: configurable (default 20MB)
 
 2. **Adjust Compression Settings:**
-   - **Rank Slider**: Control the number of singular values (1-100)
-   - **Quality Slider**: Fine-tune compression quality (0-100)
-   - **Color Mix**: Adjust color channel processing
+   - **Rank Slider**: Control the number of singular values (1…maxRank, where maxRank ≈ min(image width, image height))
+   - **Color Mix**: Adjust color-vs-grayscale blending of RGB channels
+   - **Algorithm**: Choose between power iteration, Jacobi, and QR variants (power iteration is the default)
 
 3. **Monitor Processing:**
    - Real-time progress indicators
@@ -386,7 +376,6 @@ npm run start
 4. **Review Results:**
    - Side-by-side comparison
    - Quality metrics
-   - Download compressed image
 
 ### Compression Settings
 
@@ -400,13 +389,9 @@ npm run start
 - Higher values = lower compression, higher quality
 - Recommended range: 10-50 for most images
 
-**Quality Parameter:**
+**Quality Parameter (internal):**
 
-- Fine-tunes the compression algorithm
-- Affects both file size and visual quality
-- Works in conjunction with rank parameter
-- Real-time preview of changes
-- Interaction with rank: Rank is the primary control for retained detail; Quality provides subtle weighting/clamping in reconstruction so you can fine-tune appearance at a fixed rank.
+- Not exposed in the default UI. The pipeline supports an internal quality weighting under an alternative reconstruction engine; by default the app uses classic truncated SVD controlled by rank.
 
 **Color Mix:**
 
@@ -432,7 +417,7 @@ npm run start
 
 - Color-coded metrics (green/yellow/red)
 - Performance score (0-100)
-- Animated progress bars
+- Progress bar
 - Processing status updates
 
 </details>
@@ -454,7 +439,7 @@ This section tracks Lighthouse performance over time and highlights optimization
 
 Desktop (prod, Lighthouse categories):
 
-- Performance: **82**
+- Performance: **90**
 - Accessibility: **84**
 - Best Practices: **100**
 - SEO: **100**
@@ -593,9 +578,8 @@ Notes on metrics used in the app:
 
 ### Quality Metrics
 
-- **Peak Signal-to-Noise Ratio (PSNR)**
-- **Structural Similarity Index (SSIM)**
-- **Mean Squared Error (MSE)**
+- The app computes a PSNR-derived normalized score for display.
+- SSIM and MSE are standard metrics discussed in the documentation but are not computed by the current UI.
 
 ## Educational Content
 
@@ -628,7 +612,7 @@ Notes on metrics used in the app:
 ### Current Constraints
 
 - **File Size**: Maximum 20MB per image (configurable via `NEXT_PUBLIC_FILE_SIZE_LIMIT`)
-- **Format Support**: JPG, PNG, BMP formats only
+- **Format Support**: JPG, PNG, BMP, and GIF (first frame only)
 - **Processing Time**: Large images may take several seconds
 - **Browser Compatibility**: Modern browsers required
 - **Memory Usage**: Large images require significant memory
@@ -694,7 +678,7 @@ npm run dev
 
 ## Academic License and Usage
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ### Academic Context
 

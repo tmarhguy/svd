@@ -82,4 +82,7 @@ export function makeErrorRes(error: unknown): ErrorRes {
   return { msg: WorkerResType.ERROR, error: message };
 }
 
+// Union type for all worker responses
+export type WorkerRes = SingularValuesRes | LowRankApproximationRes | LowRankFrameRes | ErrorRes;
+
 

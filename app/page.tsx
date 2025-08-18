@@ -171,16 +171,16 @@ const ControlPanel = memo(({
   }, [tickRanks, maxRank, rankToSlider]);
 
   return (
-    <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600">
-      <h3 className="text-xl font-semibold mb-4 flex items-center space-x-2">
-        <Gauge className="w-5 h-5 text-blue-400" />
+    <div className="bg-gradient-to-br from-space-800 to-space-700 p-4 sm:p-6 rounded-xl border border-space-600">
+      <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-3 sm:mb-4 flex items-center justify-center sm:justify-start space-x-2">
+        <Gauge className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
         <span>Compression Controls</span>
       </h3>
       
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {/* Rank Control */}
         <div>
-          <label className="flex items-center justify-between mb-2">
+          <label className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 space-y-1 sm:space-y-0 text-center sm:text-left">
             <span className="text-sm font-medium">
               Rank (k = {compressionOptions.rank})
             </span>
@@ -230,7 +230,7 @@ const ControlPanel = memo(({
 
         {/* Color Mix Control */}
         <div>
-          <label className="flex items-center justify-between mb-2">
+          <label className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 space-y-1 sm:space-y-0 text-center sm:text-left">
             <span className="text-sm font-medium">
               Grayscale to Color ({Math.round((compressionOptions.colorMix ?? 1) * 100)}%)
             </span>
@@ -250,13 +250,13 @@ const ControlPanel = memo(({
 
         {/* Algorithm Selection */}
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label className="block text-sm font-medium mb-2 text-center sm:text-left">
             Algorithm
           </label>
           <select
             value={compressionOptions.algorithm || 'power-iteration'}
             onChange={(e) => handleAlgorithmChange(e.target.value)}
-            className="w-full px-3 py-2 bg-space-700 border border-space-600 rounded-lg text-sm focus:outline-none focus:border-blue-400 transition-colors"
+            className="w-full px-3 py-2 bg-space-700 border border-space-600 rounded-lg text-sm focus:outline-none focus:border-blue-400 transition-colors text-center sm:text-left"
           >
             <option value="power-iteration">Power Iteration (Fast)</option>
             <option value="jacobi">Jacobi (Balanced)</option>
@@ -265,7 +265,7 @@ const ControlPanel = memo(({
         </div>
 
         {/* Performance note */}
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-gray-500 mt-2 text-center sm:text-left">
           Tip: Smaller images (lower resolution) process and update faster. Large uploads may be downscaled for responsiveness.
         </p>
 
@@ -275,13 +275,13 @@ const ControlPanel = memo(({
         {compressionResult && !loading && (
           <div className="grid grid-cols-2 gap-3 pt-4 border-t border-space-600">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-400">
+              <div className="text-xl sm:text-2xl font-bold text-green-400">
                 {Number.isFinite(compressionResult.compressionRatio) ? Math.round(compressionResult.compressionRatio) : 0}%
               </div>
               <div className="text-xs text-gray-400">Compression</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400">
+              <div className="text-xl sm:text-2xl font-bold text-blue-400">
                 {Math.round((compressionOptions.colorMix ?? 1) * 100)}%
               </div>
               <div className="text-xs text-gray-400">Color</div>
@@ -633,18 +633,18 @@ export default function Home() {
 
   return (
     <ErrorBoundary>
-      <main className="min-h-screen">
+      <main className="min-h-screen mobile-container no-overflow">
         {/* Welcome Section */}
         <WelcomeSection />
 
         {/* Interactive Demo Section */}
-        <section id="demo" className="py-12 sm:py-20 px-4 sm:px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">
+        <section id="demo" className="py-8 sm:py-12 lg:py-20 px-4 sm:px-6 w-full max-w-full overflow-hidden no-overflow mobile-safe mobile-padding-fix mobile-center mobile-full-center mobile-no-skew">
+          <div className="max-w-7xl mx-auto w-full max-w-full overflow-hidden no-overflow mobile-safe mobile-padding-fix mobile-center-container mobile-container-center mobile-no-skew">
+            <div className="text-center mb-6 sm:mb-8 lg:mb-12 w-full max-w-full overflow-hidden no-overflow mobile-safe mobile-padding-fix mobile-center-text mobile-text-center mobile-no-skew">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 mobile-text-fix">
                 Interactive SVD Compression
               </h2>
-              <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
+              <p className="text-sm sm:text-base lg:text-xl text-gray-300 max-w-3xl mx-auto px-2 mobile-text-fix">
                 Experience the power of Singular Value Decomposition in real-time. 
                 Upload an image or use our default to see how mathematical decomposition 
                 can achieve impressive compression ratios while preserving visual quality.
@@ -652,24 +652,24 @@ export default function Home() {
                       </div>
                       
                         {/* File Upload Area */}
-            <div className="mb-6 sm:mb-8">
+            <div className="mb-4 sm:mb-6 lg:mb-8 w-full max-w-full overflow-hidden mobile-safe mobile-card-fix mobile-center mobile-full-center mobile-no-skew">
               <DropZone onFile={(file) => handleFileDrop([file])} />
               
               {/* Show sample loading status */}
               {isClient && sampleLoading && !file && (
-                <div className="mt-4 p-4 bg-blue-500/20 border border-blue-500 rounded-lg text-blue-300">
+                <div className="mt-4 p-4 bg-blue-500/20 border border-blue-500 rounded-lg text-blue-300 w-full max-w-full overflow-hidden mobile-safe mobile-text-fix mobile-center">
                   Loading sample image and data...
                           </div>
                         )}
                         
               {isClient && sampleError && (
-                <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500 rounded-lg text-yellow-300">
+                <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500 rounded-lg text-yellow-300 w-full max-w-full overflow-hidden mobile-safe mobile-text-fix mobile-center">
                   Could not load sample data: {sampleError}
                           </div>
                         )}
               
               {isClient && error && (
-                <div className="mt-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-300">
+                <div className="mt-4 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-300 w-full max-w-full overflow-hidden mobile-safe mobile-text-fix mobile-center">
                   {error}
                         </div>
                       )}
@@ -677,7 +677,7 @@ export default function Home() {
                             {/* Sample indicator removed */}
               
               {!isDefaultImage && file && sampleData && (
-                <div className="mt-4">
+                <div className="mt-4 w-full max-w-full overflow-hidden mobile-safe mobile-button-fix mobile-center">
                   <button
                     onClick={async () => {
                       // Stop any active streaming session from the uploaded image to avoid overwriting state
@@ -710,7 +710,7 @@ export default function Home() {
                           }
                       }
                     }}
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm"
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm mobile-button-fix mobile-center"
                   >
                     Back to Default Image
                   </button>
@@ -722,9 +722,9 @@ export default function Home() {
 
             {/* Compression Interface */}
             {file && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-                {/* Controls */}
-                <div className="lg:col-span-1">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-y-4 xl:gap-x-8 w-full max-w-full overflow-hidden mobile-grid-fix mobile-center mobile-grid-center mobile-no-skew">
+                {/* Controls - Hidden on mobile, shown on xl+ */}
+                <div className="xl:col-span-1 order-3 xl:order-1 w-full max-w-full hidden xl:block mobile-safe">
                   <ControlPanel
                     compressionOptions={compressionOptions}
                     onOptionsChange={handleOptionsChange}
@@ -735,73 +735,92 @@ export default function Home() {
             </div>
               
                 {/* Image Comparison */}
-                <div className="lg:col-span-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-stretch">
+                <div className="xl:col-span-2 order-1 xl:order-2 w-full max-w-full mobile-safe mobile-center mobile-container-center mobile-no-skew">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-stretch w-full max-w-full image-grid mobile-grid-fix mobile-center-grid mobile-grid-center mobile-no-skew">
                     {/* Original Image */}
-              <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
+              <div className="bg-gradient-to-br from-space-800 to-space-700 p-4 sm:p-6 rounded-xl border border-space-600 h-full w-full image-grid-item">
                       <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">Original</h3>
-                      <div className="relative rounded-lg overflow-hidden bg-black/50" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
+                      <div className="relative rounded-lg overflow-hidden bg-black/50 w-full image-container image-wrapper aspect-ratio-container" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
                         {isClient && originalUrl && (
                           <NextImage 
                             src={originalUrl} 
                             alt="Original"
                             fill
-                            className="object-contain"
+                            className="object-contain w-full h-full next-image-container image-fill"
                             unoptimized
+                            loading="eager"
+                            priority={isDefaultImage}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           />
                         )}
                       </div>
                 </div>
  
                      {/* Compressed Image */}
-                <div className="bg-gradient-to-br from-space-800 to-space-700 p-6 rounded-xl border border-space-600 h-full">
+                <div className="bg-gradient-to-br from-space-800 to-space-700 p-4 sm:p-6 rounded-xl border border-space-600 h-full w-full image-grid-item">
                       <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">
                         Compressed (k={compressionOptions.rank})
                   </h3>
-                      <div className="relative rounded-lg overflow-hidden bg-black/50" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
+                      <div className="relative rounded-lg overflow-hidden bg-black/50 w-full image-container image-wrapper aspect-ratio-container" style={{ paddingTop: `${100 / Math.max(0.0001, originalAspect)}%` }}>
                         {compressedUrl && (
                           <NextImage 
                             src={compressedUrl} 
                             alt="Compressed" 
                             fill
-                            className="object-contain"
+                            className="object-contain w-full h-full next-image-container image-fill"
                             unoptimized
+                            loading="eager"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           />
                         )}
                       </div>
                      </div>
              </div>
 
-              {/* Performance Monitor */}
-                  {isClient && (
-                    <div className="mt-4 sm:mt-6">
-                  <PerformanceMonitor 
-                isProcessing={effectiveLoading}
-                metrics={compressionResult && compressionResult.metadata ? (() => {
-                  const actualCompression = Number.isFinite(compressionResult.compressionRatio)
-                    ? compressionResult.compressionRatio
-                    : 0;
-                  return {
-                    processingTime: Math.max(1, compressionResult.processingTime),
-                    memoryUsage: compressionResult.compressedSize,
-                    cpuUsage: 0,
-                    compressionRatio: Math.max(0, Math.min(100, actualCompression)),
-                    qualityScore: compressionResult.quality,
-                    originalSize: compressionResult.originalSize,
-                    compressedSize: compressionResult.compressedSize,
-                  };
-                })() : null}
-                colorMix={compressionOptions.colorMix ?? 1}
-              />
-                    </div>
-                  )}
                 </div>
+                
+                {/* Controls - Mobile only, shown right after images */}
+                <div className="xl:hidden order-2 w-full max-w-full overflow-hidden mobile-safe mobile-fix mobile-center mobile-controls-consistent">
+                  <ControlPanel
+                    compressionOptions={compressionOptions}
+                    onOptionsChange={handleOptionsChange}
+                    loading={effectiveLoading}
+                compressionResult={compressionResult}
+                maxRank={dynamicMaxRank}
+              />
+            </div>
+            
+            {/* Performance Monitor - Below controls on mobile */}
+            {isClient && (
+              <div className="mt-4 sm:mt-6 xl:mt-4 w-full max-w-full overflow-hidden order-3 xl:order-3 xl:col-span-2 xl:col-start-2 mobile-center mobile-controls-consistent flex justify-center">
+                <div>
+                  <PerformanceMonitor 
+                    isProcessing={effectiveLoading}
+                    metrics={compressionResult && compressionResult.metadata ? (() => {
+                      const actualCompression = Number.isFinite(compressionResult.compressionRatio)
+                        ? compressionResult.compressionRatio
+                        : 0;
+                      return {
+                        processingTime: Math.max(1, compressionResult.processingTime),
+                        memoryUsage: compressionResult.compressedSize,
+                        cpuUsage: 0,
+                        compressionRatio: Math.max(0, Math.min(100, actualCompression)),
+                        qualityScore: compressionResult.quality,
+                        originalSize: compressionResult.originalSize,
+                        compressedSize: compressionResult.compressedSize,
+                      };
+                    })() : null}
+                    colorMix={compressionOptions.colorMix ?? 1}
+                  />
+                </div>
+              </div>
+            )}
             </div>
             )}
 
             {/* Matrix Representation */}
             {file && !effectiveLoading && (
-              <div className="mt-8 sm:mt-12">
+              <div className="mt-8 sm:mt-12 lg:mt-16 w-full max-w-full overflow-hidden mobile-safe mobile-center mobile-component-spacing">
                 <MatrixRepresentation
                   file={file}
                   compressionResult={compressionResult}
@@ -812,7 +831,7 @@ export default function Home() {
 
             {/* Writeup: moved directly after Matrix */}
             <Suspense fallback={<div className="h-72 sm:h-96 bg-space-800 animate-pulse rounded-xl" />}>
-              <div className="mt-8 sm:mt-12">
+              <div className="mt-12 sm:mt-16 lg:mt-20 w-full max-w-full overflow-hidden mobile-safe mobile-center">
                 <WriteupSection />
               </div>
             </Suspense>
@@ -821,8 +840,8 @@ export default function Home() {
 
         {/* Educational Content - Lazy Loaded */}
         <Suspense fallback={<div className="h-96 bg-space-900 animate-pulse" />}>
-          <section className="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-space-900 to-space-800">
-            <div className="max-w-7xl mx-auto">
+          <section className="py-8 sm:py-12 lg:py-20 px-4 sm:px-6 bg-gradient-to-b from-space-900 to-space-800 w-full max-w-full overflow-hidden mobile-safe mobile-center">
+            <div className="max-w-7xl mx-auto w-full max-w-full mobile-safe mobile-center-container">
         <CompressionComparison 
           originalSize={compressionResult?.originalSize ?? null}
           compressedSize={compressionResult?.compressedSize ?? null}
@@ -839,8 +858,8 @@ export default function Home() {
 
         {/* Interactive Content */}
         <Suspense fallback={<div className="h-96 bg-space-800 animate-pulse" />}>
-          <section className="py-12 sm:py-20 px-4 sm:px-6">
-            <div className="max-w-7xl mx-auto">
+          <section className="py-8 sm:py-12 lg:py-20 px-4 sm:px-6 w-full max-w-full overflow-hidden mobile-safe mobile-center">
+            <div className="max-w-7xl mx-auto w-full max-w-full mobile-safe mobile-center-container">
               <Quiz />
           </div>
         </section>
@@ -848,13 +867,13 @@ export default function Home() {
 
         {/* Footer Content */}
         <Suspense fallback={null}>
-          <footer className="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-t from-space-950 to-space-900">
-            <div className="max-w-7xl mx-auto">
+          <footer className="py-8 sm:py-12 lg:py-20 px-4 sm:px-6 bg-gradient-to-t from-space-950 to-space-900 w-full max-w-full overflow-hidden mobile-safe mobile-center">
+            <div className="max-w-7xl mx-auto w-full max-w-full mobile-safe mobile-center-container">
               <ReferencesSection />
           <AboutAuthor />
               
               {/* Project Info */}
-              <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-space-800 text-center text-xs sm:text-sm text-gray-400">
+              <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-space-800 text-center text-xs sm:text-sm text-gray-400 w-full max-w-full overflow-hidden mobile-safe mobile-text-fix mobile-center">
                 <p>
                   {projectInfo.project} by {projectInfo.student}
                 </p>

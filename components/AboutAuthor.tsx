@@ -75,10 +75,10 @@ const socialLinks: SocialLink[] = [
 export default function AboutAuthor() {
   return (
     <section className="mb-12">
-      <div className="bg-gradient-to-br from-space-900 to-space-800 p-8 rounded-xl border border-space-700">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4 neon-text">About the Author</h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+      <div className="bg-gradient-to-br from-space-900 to-space-800 p-4 sm:p-6 lg:p-8 rounded-xl border border-space-700">
+        <div className="text-center mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 neon-text">About the Author</h2>
+          <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto px-2">
             Meet the developer behind this SVD Image Compression project
           </p>
         </div>
@@ -92,8 +92,8 @@ export default function AboutAuthor() {
             transition={{ duration: 0.5 }}
             className="space-y-6"
           >
-            <div className="flex items-start space-x-6 mb-6">
-              <div className="w-80 h-62 rounded-xl overflow-hidden border-3 border-blue-500 shadow-xl flex-shrink-0">
+            <div className="flex flex-col lg:flex-row items-start space-y-6 lg:space-y-0 lg:space-x-6 mb-6">
+              <div className="w-full lg:w-80 h-62 rounded-xl overflow-hidden border-3 border-blue-500 shadow-xl flex-shrink-0 mx-auto lg:mx-0">
                 <Image 
                   src="/me.jpg" 
                   alt="Tyrone Marhguy" 
@@ -102,47 +102,49 @@ export default function AboutAuthor() {
                   className="w-full h-full object-cover"
                   priority={false}
                   quality={85}
+                  loading="lazy"
+                  sizes="(max-width: 1024px) 100vw, 320px"
                 />
               </div>
-              <div className="flex-1">
-                <h3 className="text-3xl font-bold text-white mb-2">Tyrone Marhguy</h3>
-                <p className="text-gray-400 text-lg mb-4">Computer Engineering Student</p>
+              <div className="flex-1 text-center lg:text-left">
+                <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">Tyrone Marhguy</h3>
+                <p className="text-gray-400 text-base lg:text-lg mb-4">Computer Engineering Student</p>
                 
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-2 lg:space-y-0 lg:space-x-3">
                     <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
                       <GraduationCap className="w-5 h-5 text-white" />
                     </div>
-                    <div>
+                    <div className="text-center lg:text-left">
                       <h4 className="font-semibold text-blue-400">Education</h4>
-                      <p className="text-gray-300">Computer Engineering Class of 2028</p>
-                      <p className="text-gray-400 text-sm">University of Pennsylvania</p>
+                      <p className="text-gray-300 text-sm lg:text-base">Computer Engineering Class of 2028</p>
+                      <p className="text-gray-400 text-xs lg:text-sm">University of Pennsylvania</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-2 lg:space-y-0 lg:space-x-3">
                     <div className="p-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg">
                       <Mail className="w-5 h-5 text-white" />
                     </div>
-                    <div>
+                    <div className="text-center lg:text-left">
                       <h4 className="font-semibold text-green-400">Contact</h4>
                       <a 
                         href="mailto:tmarhguy@seas.upenn.edu" 
-                        className="text-gray-300 hover:text-white transition-colors"
+                        className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base break-words"
                       >
                         tmarhguy@seas.upenn.edu
                       </a>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-2 lg:space-y-0 lg:space-x-3">
                     <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
                       <BookOpen className="w-5 h-5 text-white" />
                     </div>
-                    <div>
+                    <div className="text-center lg:text-left">
                       <h4 className="font-semibold text-purple-400">Course</h4>
-                      <p className="text-gray-300">MATH 3120 - Linear Algebra</p>
-                      <p className="text-gray-400 text-sm">Final Project</p>
+                      <p className="text-gray-300 text-sm lg:text-base">MATH 3120 - Linear Algebra</p>
+                      <p className="text-gray-400 text-xs lg:text-sm">Final Project</p>
                     </div>
                   </div>
                 </div>
@@ -191,7 +193,7 @@ export default function AboutAuthor() {
                 <span>Connect & Explore</span>
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
                 {socialLinks.map((link, index) => (
                   <motion.a
                     key={link.name}
@@ -202,17 +204,17 @@ export default function AboutAuthor() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
-                    className="group bg-gradient-to-br from-space-800 to-space-700 p-4 rounded-xl border border-space-600 hover:border-space-500 transition-all duration-300 hover:scale-105"
+                    className="group bg-gradient-to-br from-space-800 to-space-700 p-3 lg:p-4 rounded-xl border border-space-600 hover:border-space-500 transition-all duration-300 hover:scale-105"
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-3 text-center sm:text-left">
                       <div className={`p-2 bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg group-hover:scale-110 transition-transform duration-300`}>
                         <link.icon className={`w-5 h-5 ${link.color}`} />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-200 group-hover:text-white transition-colors">
+                        <h4 className="font-semibold text-gray-200 group-hover:text-white transition-colors text-sm lg:text-base">
                           {link.name}
                         </h4>
-                        <p className="text-sm text-gray-400">{link.description}</p>
+                        <p className="text-xs lg:text-sm text-gray-400">{link.description}</p>
                       </div>
                     </div>
                   </motion.a>
@@ -226,7 +228,7 @@ export default function AboutAuthor() {
                 <span>Technical Skills</span>
               </h3>
               
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-3 bg-gradient-to-br from-space-800 to-space-700 rounded-lg border border-space-600">
                   <div className="flex items-center space-x-2 mb-2">
                     <Zap className="w-4 h-4 text-yellow-400" />

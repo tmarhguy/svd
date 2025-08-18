@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import PerformanceTracker from "../components/PerformanceTracker";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'arial'],
+  adjustFontFallback: true
+});
 
 export const metadata: Metadata = {
   title: "SVD Quantum Image Compression - Tyrone Marhguy",
@@ -15,6 +22,12 @@ export const metadata: Metadata = {
       { url: '/favicon.ico', sizes: '32x32' }
     ],
     apple: { url: '/favicon.svg', type: 'image/svg+xml' }
+  },
+  other: {
+    'X-DNS-Prefetch-Control': 'on',
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
   }
 };
 
@@ -24,6 +37,8 @@ export const viewport = {
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
+  viewportFit: 'cover',
+  shrinkToFit: 'no',
 };
 
 export default function RootLayout({
@@ -32,13 +47,39 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Performance optimizations */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Critical CSS preload */}
+        <link rel="preload" href="/app/globals.css" as="style" />
+        
+        {/* Service Worker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                      console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                      console.log('SW registration failed: ', registrationError);
+                    });
+                });
+              }
+            `,
+          }}
+        />
+        
         {/* Next will inject the viewport meta from the exported viewport object */}
       </head>
-      <body className={`${inter.className} space-bg cyber-grid-bg`}>
-        {/* Matrix Rain Effect */}
-        <div className="matrix-rain"></div>
+      <body className={`${inter.className} theme-white`}>
+        <PerformanceTracker />
         
         {/* Main Content */}
         <div className="relative z-10">
