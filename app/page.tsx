@@ -777,6 +777,30 @@ export default function Home() {
                      </div>
              </div>
 
+                  {/* Desktop-only Performance Monitor directly under images to maintain spacing */}
+                  {isClient && (
+                    <div className="hidden xl:block mt-4 w-full">
+                      <PerformanceMonitor 
+                        isProcessing={effectiveLoading}
+                        metrics={compressionResult && compressionResult.metadata ? (() => {
+                          const actualCompression = Number.isFinite(compressionResult.compressionRatio)
+                            ? compressionResult.compressionRatio
+                            : 0;
+                          return {
+                            processingTime: Math.max(1, compressionResult.processingTime),
+                            memoryUsage: compressionResult.compressedSize,
+                            cpuUsage: 0,
+                            compressionRatio: Math.max(0, Math.min(100, actualCompression)),
+                            qualityScore: compressionResult.quality,
+                            originalSize: compressionResult.originalSize,
+                            compressedSize: compressionResult.compressedSize,
+                          };
+                        })() : null}
+                        colorMix={compressionOptions.colorMix ?? 1}
+                      />
+                    </div>
+                  )}
+
                 </div>
                 
                 {/* Controls - Mobile only, shown right after images */}
@@ -792,7 +816,7 @@ export default function Home() {
             
             {/* Performance Monitor - Below controls on mobile */}
             {isClient && (
-              <div className="mt-4 sm:mt-6 xl:mt-4 w-full max-w-full overflow-hidden order-3 xl:order-3 xl:col-span-2 xl:col-start-2 mobile-center mobile-controls-consistent flex justify-center">
+              <div className="mt-4 sm:mt-6 w-full max-w-full overflow-hidden order-3 xl:hidden mobile-center mobile-controls-consistent flex justify-center">
                 <div>
                   <PerformanceMonitor 
                     isProcessing={effectiveLoading}
