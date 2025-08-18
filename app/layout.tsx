@@ -54,8 +54,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
-        {/* Critical CSS preload */}
-        <link rel="preload" href="/app/globals.css" as="style" />
+        {/* Note: Next handles CSS injection for imported styles; avoid preloading non-routed paths */}
         
         {/* Service Worker */}
         <script

@@ -6,8 +6,6 @@ const DYNAMIC_CACHE = 'svd-dynamic-v1';
 // Files to cache immediately
 const STATIC_FILES = [
   '/',
-  '/app/globals.css',
-  '/app/layout.css',
   '/favicon.svg',
   '/ghanaimage.jpg',
   '/me.jpg'
